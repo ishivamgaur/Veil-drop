@@ -7,6 +7,8 @@
 
 ## 🏛️ System Architecture Overview
 
+![Veil Drop Architecture Diagram](./client/public/architecture_diagram.jpg)
+
 Veil Drop uses a modern monorepo architecture separating the **React (Vite)** frontend client from the **Node.js / Socket.IO** real-time signaling backend.
 
 ```
