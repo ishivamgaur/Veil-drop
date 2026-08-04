@@ -8,7 +8,7 @@
 
 Veil Drop relies on a robust hybrid network architecture. Below is the visual architectural diagram showing how our real-time discovery engine and peer-to-peer data transmission operate seamlessly without server payload retention:
 
-![Veil Drop Architecture Diagram](./client/public/architecture_diagram.svg)
+![Veil Drop Architecture Diagram](./client/public/architecture_diagram.jpg)
 
 ### Key Phases in the Flow:
 1. **Signaling Server (Node.js/Socket.IO on Port 5000)**: Acts exclusively as an introduction rendezvous point. It broadcasts device presence and relays WebRTC session descriptions (ICE candidates, SDP offers, and answers). **No actual file payloads ever pass through or reside on this server.**
