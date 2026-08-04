@@ -67,7 +67,12 @@ All signaling communication occurs via typed event string identifiers defined in
 
 ## 4. Security & Encryption Standard ("The Veil")
 
+Below is the detailed step-by-step visual workflow explaining how file selection, cryptographic slicing, direct transmission, and decryption occur when **Veil Privacy Mode** is enabled:
+
+![Detailed Encryption & Decryption Flow](./client/public/detailed_encryption_flow.jpg)
+
 When **Veil Privacy Mode** is active:
-1. Prior to transmission, the file Blob is partitioned into lightweight `ArrayBuffer` chunks.
-2. An ephemeral initialization vector (`IV`) and cryptographic key are derived using JavaScript's native **Web Crypto API** (`AES-GCM` algorithm).
-3. Chunks are streamed in ciphertext over WebRTC; the receiving peer authenticates payloads using the matching ephemeral PIN/key before reconstruction.
+1. **Slicing**: Prior to transmission, the selected file Blob is partitioned into lightweight `ArrayBuffer` slices.
+2. **Encryption**: An ephemeral initialization vector (`IV`) and cryptographic key are derived using JavaScript's native **Web Crypto API** (`AES-GCM` algorithm) locked to an ephemeral verification PIN.
+3. **P2P Streaming**: Chunks are streamed in ciphertext over direct WebRTC UDP channels.
+4. **Decryption & Assembly**: The receiving peer authenticates and decrypts incoming payloads using the matching ephemeral verification PIN before reconstructing the original file Blob.
