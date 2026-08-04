@@ -1,0 +1,21 @@
+# Dependency & output directories
+node_modules/
+dist/
+build/
+
+# Package management
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.min.js
+*.min.css
+
+# System & temporary logs
+.DS_Store
+Thumbs.db
+*.log
+
+# Git & IDE configurations
+.git/
+.vscode/
+.idea/
