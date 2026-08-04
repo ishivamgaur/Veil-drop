@@ -14,14 +14,39 @@ Veil Drop relies on a robust hybrid network architecture. Below is the visual ar
 1. **Signaling Server (Node.js/Socket.IO on Port 5000)**: Acts exclusively as an introduction rendezvous point. It broadcasts device presence and relays WebRTC session descriptions (ICE candidates, SDP offers, and answers). **No actual file payloads ever pass through or reside on this server.**
 2. **Client Peers (React/Vite on Port 5173)**: Once handshaken via the signaling server, clients establish a direct, peer-to-peer (P2P) UDP/SCTP WebRTC Data Channel for ultra-fast file chunk streaming.
 
-```
-       [ Signaling Server (Port 5000) ]
-        ^                           ^
-        | (1) Discovery & Handshake | 
-        v                           v
- [ Client Peer A ] <===================> [ Client Peer B ]
-                      (2) Direct P2P
-                   Encrypted Data Channel
+### 🔄 Deep-Dive: Under-the-Hood Sequence Flow
+
+Below is the complete step-by-step chronology of arrows and operations from the moment a file is dropped to final download completion:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as Sender (Client A)
+    participant S as Signaling Server (Node.js/Port 5000)
+    actor B as Receiver (Client B)
+
+    Note over A,S: Step 1: Initial Discovery & Presence Mesh
+    A->>S: emit('peer:joined', { deviceName: 'Desktop-01' })
+    B->>S: emit('peer:joined', { deviceName: 'MacBook-M3' })
+    S-->>A: emit('peer:list_update', [MacBook-M3])
+    S-->>B: emit('peer:list_update', [Desktop-01])
+
+    Note over A,B: Step 2: File Selection & Initiation (No Data on Server!)
+    A->>S: emit('transfer:initiate', { target: 'PeerB', name: 'File.zip', size: '500MB' })
+    S->>B: relay('transfer:initiate', { from: 'PeerA', metadata })
+    Note over B: Receiver UI displays: "Accept Drop from Desktop-01?" (User clicks Accept)
+
+    Note over A,B: Step 3: WebRTC SDP Offer / Answer Handshake
+    A->>S: emit('signal:offer', { sdp: OfferSessionDescription })
+    S->>B: relay Offer
+    B->>S: emit('signal:answer', { sdp: AnswerSessionDescription })
+    S->>A: relay Answer & ICE UDP Candidates
+    Note over S: 🛑 SERVER JOB IS COMPLETE. Node.js steps out of wire loop!
+
+    Note over A,B: Step 4: Direct P2P Encrypted Data Stream
+    Note over A: Web Crypto API derives AES-GCM Key from 6-Digit PIN<br/>Slices file into 64KB ArrayBuffer chunks & encrypts in RAM
+    A-->>B: Stream Encrypted Chunks directly via UDP WebRTC Data Channel (LAN Speed)
+    Note over B: Real-Time Decryption Engine verifies IV via matching PIN<br/>Reassembles clean bytes into ordered Blob & triggers file download
 ```
 
 ---
