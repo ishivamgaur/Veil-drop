@@ -4,11 +4,15 @@
 
 ---
 
-## 1. System Topology & Data Flow
+## 1. System Topology & Data Flow Diagram
 
-Veil Drop relies on a hybrid network structure:
-1. **Signaling Server (Node.js/Socket.IO)**: Acts exclusively as an introduction rendezvous point. It broadcasts presence and relays WebRTC session descriptions (ICE candidates, offers, answers). **No actual file payloads pass through this server.**
-2. **Client Peers (React/WebRTC)**: Once handshaken via the signaling server, clients establish a direct, peer-to-peer (P2P) UDP/SCTP Data Channel for high-speed file chunk streaming.
+Veil Drop relies on a robust hybrid network architecture. Below is the visual architectural diagram showing how our real-time discovery engine and peer-to-peer data transmission operate seamlessly without server payload retention:
+
+![Veil Drop Architecture Diagram](./client/public/architecture_diagram.svg)
+
+### Key Phases in the Flow:
+1. **Signaling Server (Node.js/Socket.IO on Port 5000)**: Acts exclusively as an introduction rendezvous point. It broadcasts device presence and relays WebRTC session descriptions (ICE candidates, SDP offers, and answers). **No actual file payloads ever pass through or reside on this server.**
+2. **Client Peers (React/Vite on Port 5173)**: Once handshaken via the signaling server, clients establish a direct, peer-to-peer (P2P) UDP/SCTP WebRTC Data Channel for ultra-fast file chunk streaming.
 
 ```
        [ Signaling Server (Port 5000) ]
@@ -24,7 +28,7 @@ Veil Drop relies on a hybrid network structure:
 
 ## 2. Code Nomenclature & Coding Standards
 
-To maintain industry-standard craftsmanship, all code inside this repository must follow strict naming conventions:
+To maintain industry-standard craftsmanship, all code inside this repository follows strict structural conventions:
 
 ### A. File & Component Naming
 - **React Components**: `PascalCase` (e.g., `RadarStage.jsx`, `TransferMonitor.jsx`, `Header.jsx`).
@@ -64,6 +68,6 @@ All signaling communication occurs via typed event string identifiers defined in
 ## 4. Security & Encryption Standard ("The Veil")
 
 When **Veil Privacy Mode** is active:
-1. Prior to transmission, the file Blob is partitioned into `ArrayBuffer` chunks.
+1. Prior to transmission, the file Blob is partitioned into lightweight `ArrayBuffer` chunks.
 2. An ephemeral initialization vector (`IV`) and cryptographic key are derived using JavaScript's native **Web Crypto API** (`AES-GCM` algorithm).
 3. Chunks are streamed in ciphertext over WebRTC; the receiving peer authenticates payloads using the matching ephemeral PIN/key before reconstruction.
