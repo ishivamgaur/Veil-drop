@@ -1,8 +1,17 @@
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Shadcn UI utility helper to merge Tailwind classes cleanly without conflicts.
+ */
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
 /**
  * Pure Utility Helpers
  * Formats data sizes, generates ephemeral pins, and simulates network telemetry.
  */
-
 export const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;

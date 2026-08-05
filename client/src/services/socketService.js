@@ -17,8 +17,15 @@ class SocketService {
     try {
       this.socket = io(this.serverUrl, {
         reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000
+        reconnectionAttempts: 2,
+        reconnectionDelay: 2000,
+        timeout: 3000,
+        transports: ['websocket', 'polling']
+      });
+
+      this.socket.on('connect_error', () => {
+        // Quietly handle offline standalone server fallback
+        this.isConnected = false;
       });
 
       this.socket.on('connect', () => {

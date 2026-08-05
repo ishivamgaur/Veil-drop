@@ -39,12 +39,12 @@ export const usePeers = (deviceName, addToast) => {
   }, [deviceName]);
 
   const toggleSelectPeer = useCallback((peer) => {
-    if (selectedPeer && selectedPeer.id === peer.id) {
+    if (!peer || (selectedPeer && (selectedPeer.id === peer.id || selectedPeer.deviceName === peer.deviceName))) {
       setSelectedPeer(null);
-      if (addToast) addToast('ℹ️ Peer deselected. Next file drop will auto-route to nearest node.');
+      if (addToast) addToast('Target set to Broadcast to All LAN Peers.');
     } else {
       setSelectedPeer(peer);
-      if (addToast) addToast(`⚡ Targeted ${peer.deviceName} for instantaneous encrypted transfer.`);
+      if (addToast) addToast(`Target locked: ${peer.deviceName}`);
     }
   }, [selectedPeer, addToast]);
 

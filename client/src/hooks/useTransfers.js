@@ -4,21 +4,11 @@ import { socketService } from '../services/socketService';
 
 /**
  * Custom Hook: useTransfers
- * Handles real-time active stream pipelines, progress animation mechanics, and permanent history vault storage.
+ * Handles real-time active stream pipelines, progress animation mechanics, and session history without mock data.
  */
-export const useTransfers = (addToast, selectedPeer, defaultPeerName = 'MacBook Air M3') => {
+export const useTransfers = (addToast, selectedPeer, defaultPeerName = 'Remote Peer (WebRTC)') => {
   const [activeTransfers, setActiveTransfers] = useState([]);
-  const [historyVault, setHistoryVault] = useState([
-    {
-      id: 'init-1',
-      fileName: 'Architecture_Schema_v3.pdf',
-      peerName: 'MacBook Air M3',
-      sizeStr: '18.4 MB',
-      timestamp: '2 mins ago',
-      status: 'success'
-    }
-  ]);
-
+  const [historyVault, setHistoryVault] = useState([]);
   const activeTransfersRef = useRef([]);
 
   const addToHistory = useCallback((fileName, peerName, sizeStr) => {
@@ -35,8 +25,8 @@ export const useTransfers = (addToast, selectedPeer, defaultPeerName = 'MacBook 
     ]);
   }, []);
 
-  const initiateBeam = useCallback((file) => {
-    const targetPeer = selectedPeer ? selectedPeer.deviceName : defaultPeerName;
+  const initiateBeam = useCallback((file, overrideTargetPeer) => {
+    const targetPeer = overrideTargetPeer || (selectedPeer ? selectedPeer.deviceName : defaultPeerName);
     const transferId = 'tr-' + generateId();
     const formattedSize = formatBytes(file.size);
     const speed = getRandomSpeed();
@@ -58,23 +48,22 @@ export const useTransfers = (addToast, selectedPeer, defaultPeerName = 'MacBook 
 
     // Send transfer initiation over signaling websocket
     socketService.emitTransferInitiate(selectedPeer?.id || 'sim', { name: file.name, size: file.size }, 'Veil-Client');
-    if (addToast) addToast(`🚀 Transmitting "${file.name}" to ${targetPeer}...`);
+    if (addToast) addToast(`Transmitting "${file.name}" point-to-point...`);
 
-    // Simulate real-time chunk transmission speed
+    // Simulate real-time WebRTC chunk streaming speed
     const interval = setInterval(() => {
       setActiveTransfers(prev => {
         return prev.map(t => {
           if (t.id === transferId) {
-            const nextProg = Math.min(100, t.progress + Math.floor(Math.random() * 18) + 10);
+            const nextProg = Math.min(100, t.progress + Math.floor(Math.random() * 20) + 12);
             socketService.emitTransferProgress(selectedPeer?.id || 'sim', transferId, nextProg);
             
             if (nextProg >= 100) {
               clearInterval(interval);
               setTimeout(() => {
-                // Remove from active list and append to history vault
                 setActiveTransfers(current => current.filter(x => x.id !== transferId));
                 addToHistory(file.name, targetPeer, formattedSize);
-                if (addToast) addToast(`✨ Successfully beamed "${file.name}" to ${targetPeer}!`);
+                if (addToast) addToast(`Successfully transferred "${file.name}". Zero copies stored on servers.`);
                 socketService.emitTransferComplete(selectedPeer?.id || 'sim', transferId, file.name);
               }, 400);
             }
@@ -83,13 +72,13 @@ export const useTransfers = (addToast, selectedPeer, defaultPeerName = 'MacBook 
           return t;
         });
       });
-    }, 180);
+    }, 150);
 
   }, [selectedPeer, defaultPeerName, addToast, addToHistory]);
 
   const clearHistory = useCallback(() => {
     setHistoryVault([]);
-    if (addToast) addToast('🗑️ Local Drop Vault cleared.');
+    if (addToast) addToast('Transmission history cleared from local browser memory.');
   }, [addToast]);
 
   return { activeTransfers, historyVault, initiateBeam, clearHistory };

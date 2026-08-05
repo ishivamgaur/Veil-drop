@@ -1,41 +1,46 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
+import { Button } from '../ui/Button';
+import HistoryRow from './HistoryRow';
 
 /**
- * Drop Vault History Component
- * Lists successfully transmitted local drop records with action buttons to clear logs.
+ * Drop Vault History Monitor
+ * Swiss architectural log of completed file transfers without icon spam.
  */
 export default function HistoryVault({ historyVault, clearHistory }) {
   return (
-    <div className="history-panel glass-panel">
-      <header className="panel-header">
-        <h3>Drop Vault (Local History)</h3>
-        {historyVault.length > 0 && (
-          <button className="btn-clear" onClick={clearHistory} title="Clear all history logs">
-            Clear
-          </button>
-        )}
-      </header>
+    <Card className="border-[#22242b] bg-[#101114] shadow-none">
+      <CardHeader className="flex-row items-center justify-between pb-4 mb-4 border-b border-[#22242b]">
+        <CardTitle className="text-base font-bold text-[#f2f3f7]">
+          Transmission Log
+        </CardTitle>
 
-      <ul className="history-list">
-        {historyVault.length === 0 ? (
-          <li className="history-item empty-history" style={{ justifyContent: 'center', color: 'var(--text-muted)', border: 'none', background: 'transparent', fontSize: '0.82rem', padding: '20px 0' }}>
-            Vault log is currently empty.
-          </li>
-        ) : (
-          historyVault.map((item) => (
-            <li key={item.id} className="history-item">
-              <div className="history-icon">⚡</div>
-              <div className="history-meta">
-                <div className="history-name" title={item.fileName}>{item.fileName}</div>
-                <div className="history-info">
-                  Beamed to <strong>{item.peerName}</strong> • {item.sizeStr}
-                </div>
-              </div>
-              <span className="status-badge success">Beamed ✓</span>
-            </li>
-          ))
+        {historyVault.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearHistory}
+            className="h-7 px-3 text-xs text-[#888b94] hover:text-white"
+            title="Clear transmission records"
+          >
+            Clear Log
+          </Button>
         )}
-      </ul>
-    </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+          {historyVault.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center py-8 px-4 rounded-xl border border-dashed border-[#22242b] bg-[#070708]/30 text-[#71747e]">
+              <span className="text-xs">No completed transfer sessions recorded.</span>
+            </div>
+          ) : (
+            historyVault.map((item) => (
+              <HistoryRow key={item.id} item={item} />
+            ))
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
