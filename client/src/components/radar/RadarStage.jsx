@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../utils/helpers';
+import { webrtcService } from '../../services/webRTCService';
 
 /**
  * Ultra Minimalist Radar Portal
@@ -8,15 +9,26 @@ import { cn } from '../../utils/helpers';
 export default function RadarStage({ peers = [], selectedPeer: activeSelectedPeer, toggleSelectPeer: parentTogglePeer, initiateBeam, addToast }) {
   const [internalSelectedPeer, setInternalSelectedPeer] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPayloadName, setSelectedPayloadName] = useState('Choose payloads...');
+  const fileQueueRef = React.useRef([]);
 
-  const defaultPeers = [
-    { id: 'p-101', deviceName: "MacBook Air M3", deviceType: 'Laptop', signal: 'Direct Wi-Fi' },
-    { id: 'p-102', deviceName: "iPhone 15 Pro Max", deviceType: 'Mobile', signal: 'UWB' },
-    { id: 'p-103', deviceName: "Workstation-RTX", deviceType: 'Desktop', signal: 'Gigabit LAN' }
-  ];
-
-  const displayPeers = peers && peers.length > 0 ? peers : defaultPeers;
+  const displayPeers = peers || [];
   const currentSelectedPeer = activeSelectedPeer !== undefined ? activeSelectedPeer : internalSelectedPeer;
+
+  React.useEffect(() => {
+    const handleChannelReady = () => {
+      if (fileQueueRef.current.length > 0) {
+        const file = fileQueueRef.current.shift();
+        webrtcService.sendFile(file);
+        
+        // Reset the input text after a delay
+        setTimeout(() => setSelectedPayloadName('Choose payloads...'), 2000);
+      }
+    };
+
+    window.addEventListener('webrtc:channel_ready', handleChannelReady);
+    return () => window.removeEventListener('webrtc:channel_ready', handleChannelReady);
+  }, []);
 
   const handlePeerClick = (peer) => {
     if (parentTogglePeer) {
@@ -39,12 +51,25 @@ export default function RadarStage({ peers = [], selectedPeer: activeSelectedPee
     const files = Array.from(e.target.files);
     if (!files.length) return;
     
+    if (displayPeers.length === 0) {
+      if (addToast) addToast('⚠️ No peers found on network! Open a second window to test Radar.');
+      return;
+    }
+
     const target = currentSelectedPeer || displayPeers[0];
     if (!target) return;
     
-    if (addToast) addToast(`Initiating LAN transmission to ${target.deviceName}...`);
-    files.forEach(file => {
-      if (initiateBeam) initiateBeam(file, target);
+    const file = files[0];
+    setSelectedPayloadName(file.name);
+    
+    if (addToast) addToast(`Establishing encrypted tunnel to ${target.deviceName}...`);
+    
+    files.forEach(async (f) => {
+      // Instantly trigger the UI progress bar panel!
+      if (initiateBeam) initiateBeam(f, target.deviceName);
+      
+      fileQueueRef.current.push(f);
+      await webrtcService.initiateConnection(target.id, f);
     });
   };
 
@@ -150,7 +175,7 @@ export default function RadarStage({ peers = [], selectedPeer: activeSelectedPee
             className="hidden"
           />
           <div className="flex-1 bg-transparent px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] sm:text-sm font-mono text-[#888b94] select-none text-left truncate min-w-0">
-            Choose payloads...
+            {selectedPayloadName}
           </div>
           <label
             htmlFor="radar-file-selector"

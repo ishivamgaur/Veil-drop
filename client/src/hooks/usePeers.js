@@ -3,37 +3,60 @@ import { socketService } from '../services/socketService';
 
 /**
  * Custom Hook: usePeers
- * Handles discovery of local devices on the network, maintaining local state & simulation fallback.
+ * Handles real-time discovery of local devices on the network.
  */
 export const usePeers = (deviceName, addToast) => {
-  // Default simulated discovery peers to showcase immediate rich visual interaction
-  const defaultPeers = [
-    { id: 'peer-sim-1', deviceName: 'iPhone 15 Pro Max', deviceType: 'Mobile', angle: 40, dist: 135, signal: 'Ultra-Wideband' },
-    { id: 'peer-sim-2', deviceName: 'MacBook Air M3', deviceType: 'Laptop', angle: 185, dist: 165, signal: 'Direct Wi-Fi 6E' },
-    { id: 'peer-sim-3', deviceName: 'Workstation-RTX', deviceType: 'Desktop', angle: 305, dist: 125, signal: 'Gigabit Mesh' }
-  ];
-
-  const [peers, setPeers] = useState(defaultPeers);
+  const [peers, setPeers] = useState([]);
   const [selectedPeer, setSelectedPeer] = useState(null);
 
   useEffect(() => {
-    // Attempt real-time connection to backend on port 5000
-    socketService.connect({ deviceName, deviceType: 'Desktop' }, (realPeers) => {
-      if (realPeers && realPeers.length > 0) {
-        // Map real peers to radar coordinates
-        const mappedRealPeers = realPeers.map((p, index) => ({
-          id: p.id,
-          deviceName: p.deviceName,
-          deviceType: p.deviceType,
-          angle: (index * 110 + 45) % 360,
-          dist: 130 + (index % 2) * 35,
-          signal: 'WebSocket Live'
-        }));
-        setPeers([...mappedRealPeers, ...defaultPeers.slice(0, Math.max(0, 3 - mappedRealPeers.length))]);
+    // Pass callbacks to socketService to keep state perfectly synchronized
+    socketService.connect(
+      { deviceName, deviceType: 'Desktop' }, 
+      (realPeers) => {
+        // When we get the initial list of peers in our Subnet Room
+        if (realPeers && realPeers.length > 0) {
+          const mappedRealPeers = realPeers.map((p, index) => ({
+            id: p.id,
+            deviceName: p.deviceName,
+            deviceType: p.deviceType,
+            angle: (index * 110 + 45) % 360,
+            dist: 130 + (index % 2) * 35,
+            signal: 'WebSocket Live'
+          }));
+          setPeers(mappedRealPeers);
+        } else {
+          setPeers([]);
+        }
+      },
+      (leftPeerId) => {
+        // When a peer disconnects from our Subnet Room
+        setPeers(prev => prev.filter(p => p.id !== leftPeerId));
+        setSelectedPeer(prev => prev?.id === leftPeerId ? null : prev);
       }
-    });
+    );
+
+    // Listen for when a single new peer joins AFTER us
+    const handlePeerJoined = (newPeer) => {
+      setPeers(prev => {
+        if (prev.find(p => p.id === newPeer.id)) return prev;
+        
+        const mappedPeer = {
+          id: newPeer.id,
+          deviceName: newPeer.deviceName,
+          deviceType: newPeer.deviceType,
+          angle: (prev.length * 110 + 45) % 360,
+          dist: 130 + (prev.length % 2) * 35,
+          signal: 'WebSocket Live'
+        };
+        return [...prev, mappedPeer];
+      });
+    };
+
+    socketService.on('peer:joined', handlePeerJoined);
 
     return () => {
+      socketService.off('peer:joined', handlePeerJoined);
       socketService.disconnect();
     };
   }, [deviceName]);

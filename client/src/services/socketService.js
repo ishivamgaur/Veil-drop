@@ -7,31 +7,32 @@ import { io } from 'socket.io-client';
 class SocketService {
   constructor() {
     this.socket = null;
-    this.serverUrl = 'http://localhost:5000';
+    // In dev, connect directly to backend. In prod, connect to the same origin.
+    this.serverUrl = import.meta.env.PROD ? '/' : 'http://localhost:5000';
     this.isConnected = false;
   }
 
-  connect(deviceMetadata, onPeersUpdated) {
+  connect(deviceMetadata, onPeersUpdated, onPeerLeft) {
     if (this.socket && this.socket.connected) return;
 
     try {
       this.socket = io(this.serverUrl, {
         reconnection: true,
-        reconnectionAttempts: 2,
+        reconnectionAttempts: 5,
         reconnectionDelay: 2000,
-        timeout: 3000,
+        timeout: 5000,
         transports: ['websocket', 'polling']
       });
 
-      this.socket.on('connect_error', () => {
-        // Quietly handle offline standalone server fallback
+      this.socket.on('connect_error', (err) => {
+        console.warn('⚠️ [Signaling Service] Connection error:', err.message);
         this.isConnected = false;
       });
 
       this.socket.on('connect', () => {
-        console.log('⚡ [Signaling Service] Connected to server via Socket ID:', this.socket.id);
+        console.log('⚡ [Signaling Service] Connected via Socket ID:', this.socket.id);
         this.isConnected = true;
-        this.socket.emit('peer:joined', deviceMetadata);
+        this.joinRoom(deviceMetadata);
       });
 
       this.socket.on('peer:list_update', (peers) => {
@@ -40,6 +41,11 @@ class SocketService {
 
       this.socket.on('peer:joined', (newPeer) => {
         console.log('📡 [Mesh Discovery] New peer joined:', newPeer.deviceName);
+      });
+
+      this.socket.on('peer:left', (peer) => {
+        console.log('📡 [Mesh Discovery] Peer left:', peer.deviceName);
+        if (onPeerLeft) onPeerLeft(peer.id);
       });
 
       this.socket.on('disconnect', () => {
@@ -51,21 +57,47 @@ class SocketService {
     }
   }
 
-  emitTransferInitiate(targetPeerId, fileMetadata, senderName) {
+  // Safely join a room (used to switch from Subnet Radar to Private Tunnel)
+  joinRoom(metadata) {
     if (this.socket && this.isConnected) {
-      this.socket.emit('transfer:initiate', { targetPeerId, fileMetadata, senderName });
+      this.socket.emit('peer:joined', metadata);
+    } else if (this.socket) {
+      // If still connecting, queue it to run once connected
+      this.socket.once('connect', () => {
+        this.socket.emit('peer:joined', metadata);
+      });
     }
   }
 
-  emitTransferProgress(targetPeerId, transferId, progress) {
+  // --- WebRTC Signaling ---
+  emitSignalOffer(targetPeerId, offer, fileMetadata) {
     if (this.socket && this.isConnected) {
-      this.socket.emit('transfer:progress', { targetPeerId, transferId, progress });
+      this.socket.emit('signal:offer', { targetPeerId, offer, fileMetadata });
     }
   }
 
-  emitTransferComplete(targetPeerId, transferId, fileName) {
+  emitSignalAnswer(targetPeerId, answer) {
     if (this.socket && this.isConnected) {
-      this.socket.emit('transfer:complete', { targetPeerId, transferId, fileName });
+      this.socket.emit('signal:answer', { targetPeerId, answer });
+    }
+  }
+
+  emitSignalIceCandidate(targetPeerId, candidate) {
+    if (this.socket && this.isConnected) {
+      this.socket.emit('signal:ice_candidate', { targetPeerId, candidate });
+    }
+  }
+
+  // --- Generic Event Listener Registration ---
+  on(event, callback) {
+    if (this.socket) {
+      this.socket.on(event, callback);
+    }
+  }
+
+  off(event, callback) {
+    if (this.socket) {
+      this.socket.off(event, callback);
     }
   }
 

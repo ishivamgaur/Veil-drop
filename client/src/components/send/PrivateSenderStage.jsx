@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { socketService } from '../../services/socketService';
+import { webrtcService } from '../../services/webRTCService';
+import { cryptoService } from '../../services/cryptoService';
 
 /**
  * Ultra Minimalist Sender Portal
@@ -8,21 +11,102 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [roomId, setRoomId] = useState('');
   const [encryptionKey, setEncryptionKey] = useState('');
+  const [cryptoKeyObj, setCryptoKeyObj] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [peerConnected, setPeerConnected] = useState(false);
+  const [transferComplete, setTransferComplete] = useState(false);
+  
+  // Use a ref to hold the latest files for the socket callback
+  const filesRef = useRef(selectedFiles);
+  useEffect(() => {
+    filesRef.current = selectedFiles;
+  }, [selectedFiles]);
 
   useEffect(() => {
-    setRoomId('drop-' + Math.floor(Math.random() * 899 + 100) + '-' + Math.floor(Math.random() * 899 + 100));
-    setEncryptionKey(Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map(b => b.toString(16).padStart(2, '0')).join(''));
-  }, []);
+    // Generate secure Room ID and AES Key
+    const setupRoom = async () => {
+      const newRoomId = 'drop-' + Math.floor(Math.random() * 899 + 100) + '-' + Math.floor(Math.random() * 899 + 100);
+      const { key, base64Key } = await cryptoService.generateKey();
+      
+      setRoomId(newRoomId);
+      setEncryptionKey(base64Key);
+      setCryptoKeyObj(key);
 
-  const shareLink = `https://veildrop.app/rx/${roomId}#k=${encryptionKey}`;
+      // Tell the backend to safely place us in this specific Private Room
+      socketService.joinRoom({ 
+        deviceName: 'Sender-Host', 
+        deviceType: 'Desktop',
+        roomId: newRoomId 
+      });
+
+      // 1. Listen for Receiver Joining
+      const handlePeerJoined = async (peer) => {
+        if (peer.roomId === newRoomId) {
+          setPeerConnected(true);
+          setTransferComplete(false);
+          if (addToast) addToast(`Recipient ${peer.deviceName} joined the private tunnel!`);
+          
+          if (filesRef.current.length > 0) {
+            await webrtcService.initiateConnection(peer.id, filesRef.current[0], key);
+          }
+        }
+      };
+
+      // 2. Listen for Receiver's WebRTC Answer
+      const handleAnswer = async (data) => {
+        await webrtcService.handleReceiveAnswer(data.answer);
+      };
+
+      // 3. Listen for ICE Candidates
+      const handleIceCandidate = (data) => {
+        webrtcService.handleReceiveIceCandidate(data.candidate);
+      };
+
+      socketService.on('peer:joined', handlePeerJoined);
+      socketService.on('signal:answer', handleAnswer);
+      socketService.on('signal:ice_candidate', handleIceCandidate);
+
+      // 4. Listen for Data Channel Ready to start blasting bytes!
+      const onChannelReady = () => {
+        if (filesRef.current.length > 0) {
+          // UI updates via hook or dispatch in initiateBeam
+          initiateBeam(filesRef.current[0], 'Remote Peer (WebRTC)');
+          webrtcService.sendFile(filesRef.current[0]);
+        }
+      };
+
+      const onTransferComplete = () => {
+        setTransferComplete(true);
+      };
+
+      window.addEventListener('webrtc:channel_ready', onChannelReady);
+      window.addEventListener('webrtc:transfer_complete', onTransferComplete);
+
+      return () => {
+        socketService.off('peer:joined', handlePeerJoined);
+        socketService.off('signal:answer', handleAnswer);
+        socketService.off('signal:ice_candidate', handleIceCandidate);
+        window.removeEventListener('webrtc:channel_ready', onChannelReady);
+        window.removeEventListener('webrtc:transfer_complete', onTransferComplete);
+      };
+    };
+
+    const cleanup = setupRoom();
+    
+    return () => {
+      cleanup.then(cleanFn => {
+        if (typeof cleanFn === 'function') cleanFn();
+      });
+    };
+  }, [addToast, initiateBeam]);
+
+  const shareLink = `${window.location.origin}/receive#room=${roomId}&k=${encryptionKey}`;
 
   const handleFileInput = (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       setSelectedFiles(prev => [...prev, ...Array.from(files)]);
+      setTransferComplete(false); // reset if they select new files
       if (addToast) addToast(`Ready to stream ${files.length} file(s).`);
     }
   };
@@ -108,8 +192,8 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
           
           <div className="flex items-center justify-between px-2 text-xs font-mono text-[#888b94]">
             <span className="flex items-center gap-2">
-              <span className={`w-1.5 h-1.5 rounded-full ${peerConnected ? 'bg-[#34d399] animate-pulse' : 'bg-[#ded1b6] animate-ping'}`} />
-              {peerConnected ? 'Streaming payload...' : 'Waiting for recipient...'}
+              <span className={`w-1.5 h-1.5 rounded-full ${transferComplete ? 'bg-[#888b94]' : peerConnected ? 'bg-[#34d399] animate-pulse' : 'bg-[#ded1b6] animate-ping'}`} />
+              {transferComplete ? 'Transmission complete. Tunnel closed.' : peerConnected ? 'Streaming payload...' : 'Waiting for recipient...'}
             </span>
             {!peerConnected && (
               <button onClick={simulateRecipientConnect} className="hover:text-[#ded1b6] underline transition-colors cursor-pointer">

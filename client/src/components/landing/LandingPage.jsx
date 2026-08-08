@@ -402,12 +402,27 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </p>
           </div>
           
-          <div className="flex flex-col gap-8 w-full">
-            <div className="w-full rounded-[2rem] border border-white/[0.08] bg-[#050508] p-2 sm:p-3 overflow-hidden shadow-sm">
-               <img src="/architecture_diagram.jpg" alt="Veil Drop Architecture Diagram" className="w-full h-auto rounded-[1.5rem] border border-white/[0.04]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            {/* Architecture Card 1 */}
+            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm h-full">
+              <div className="text-[10px] font-mono text-[#ded1b6] uppercase tracking-widest font-medium px-3 pt-2 mb-3">
+                SYSTEM TOPOLOGY
+              </div>
+              <div className="w-full aspect-[4/3] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04]">
+                <img src="/architecture_diagram.jpg" alt="Veil Drop Architecture Diagram" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+              </div>
             </div>
-            <div className="w-full rounded-[2rem] border border-white/[0.08] bg-[#050508] p-2 sm:p-3 overflow-hidden shadow-sm">
-               <img src="/detailed_encryption_flow.jpg" alt="Detailed Encryption Flow" className="w-full h-auto rounded-[1.5rem] border border-white/[0.04]" />
+
+            {/* Architecture Card 2 */}
+            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm h-full">
+              <div className="text-[10px] font-mono text-[#34d399] uppercase tracking-widest font-medium px-3 pt-2 mb-3">
+                CRYPTOGRAPHIC PIPELINE
+              </div>
+              <div className="w-full aspect-[4/3] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04]">
+                <img src="/detailed_encryption_flow.jpg" alt="Detailed Encryption Flow" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+              </div>
             </div>
           </div>
         </section>

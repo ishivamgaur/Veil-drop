@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/common/Header';
 import { Toaster, toast } from 'sonner';
@@ -9,7 +9,9 @@ import LandingPage from './components/landing/LandingPage';
 import Footer from './components/common/Footer';
 import { usePeers } from './hooks/usePeers';
 import { useTransfers } from './hooks/useTransfers';
-import { generateId } from './utils/helpers';
+import { socketService } from './services/socketService';
+import { webrtcService } from './services/webRTCService';
+import { cryptoService } from './services/cryptoService';
 
 /**
  * Root Application Container
@@ -25,12 +27,19 @@ export default function App() {
   const { peers, selectedPeer, toggleSelectPeer } = usePeers('Sender-Host', addToast);
   const { activeTransfers, historyVault, initiateBeam, clearHistory } = useTransfers(addToast, selectedPeer);
 
-  // Synchronize view & activeTab with URL bar (supporting #send, #receive, #radar, and browser Back/Forward buttons)
-  React.useEffect(() => {
+  // Synchronize view & activeTab with URL bar
+  useEffect(() => {
     const syncFromUrl = () => {
       const hash = window.location.hash.replace('#', '').toLowerCase();
       const path = window.location.pathname.replace('/', '').toLowerCase();
-      const route = hash || path;
+      
+      let route = path;
+      if (!route && hash && !hash.includes('room=')) {
+        route = hash;
+      }
+      if (hash.includes('room=')) {
+        route = 'receive';
+      }
 
       if (['send', 'receive', 'radar'].includes(route)) {
         setView('app');
@@ -44,6 +53,52 @@ export default function App() {
     window.addEventListener('popstate', syncFromUrl);
     return () => window.removeEventListener('popstate', syncFromUrl);
   }, []);
+
+  // Global listeners for WebRTC signals so we can accept transfers regardless of active tab
+  useEffect(() => {
+    const handleOffer = async (data) => {
+      addToast(`Incoming Transfer: ${data.fileMetadata.name}`);
+      window.dispatchEvent(new CustomEvent('webrtc:incoming_transfer', {
+        detail: {
+          fileName: data.fileMetadata.name,
+          size: data.fileMetadata.size,
+          senderId: data.senderId
+        }
+      }));
+
+      let cryptoKey = null;
+      if (data.fileMetadata.encrypted) {
+        const hash = window.location.hash;
+        if (hash.includes('k=')) {
+          const urlParams = new URLSearchParams(hash.replace('#', '?'));
+          const keyStr = urlParams.get('k');
+          if (keyStr) {
+            try {
+              cryptoKey = await cryptoService.importKey(keyStr);
+              console.log('🔐 [Veil Privacy Layer] Extracted and imported AES-GCM decryption key from URL hash.');
+            } catch (e) {
+              console.error('Failed to import AES key from URL:', e);
+              addToast('❌ Decryption failed: Invalid URL key!');
+            }
+          }
+        }
+      }
+
+      await webrtcService.handleReceiveOffer(data.senderId, data.offer, data.fileMetadata, cryptoKey);
+    };
+
+    const handleIceCandidate = (data) => {
+      webrtcService.handleReceiveIceCandidate(data.candidate);
+    };
+
+    socketService.on('signal:offer', handleOffer);
+    socketService.on('signal:ice_candidate', handleIceCandidate);
+
+    return () => {
+      socketService.off('signal:offer', handleOffer);
+      socketService.off('signal:ice_candidate', handleIceCandidate);
+    };
+  }, [addToast]);
 
   const handleLaunch = (mode = 'send') => {
     setActiveTab(mode);
