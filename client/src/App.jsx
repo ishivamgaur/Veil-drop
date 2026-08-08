@@ -6,6 +6,7 @@ import RadarStage from './components/radar/RadarStage';
 import PrivateSenderStage from './components/send/PrivateSenderStage';
 import PrivateReceiverStage from './components/receive/PrivateReceiverStage';
 import LandingPage from './components/landing/LandingPage';
+import Footer from './components/common/Footer';
 import { usePeers } from './hooks/usePeers';
 import { useTransfers } from './hooks/useTransfers';
 import { generateId } from './utils/helpers';
@@ -157,16 +158,7 @@ export default function App() {
       </main>
 
       {/* Universal Footer */}
-      <footer className="border-t border-[#181a22] py-8 text-center text-[11px] font-mono text-[#626570] bg-[#070708]">
-        <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span>VEIL DROP • DIRECT PRIVATE TRANSFERS</span>
-          <div className="flex items-center gap-6">
-            <span className="text-[#ded1b6]">P2P TUNNELS ONLINE</span>
-            <span>•</span>
-            <span>0.0 BYTES SERVER STORAGE</span>
-          </div>
-        </div>
-      </footer>
+      <Footer onLaunch={handleLaunch} onReceive={() => handleLaunch('receive')} />
 
       {/* Luxury Minimalist Sonner Toasts */}
       <Toaster 
