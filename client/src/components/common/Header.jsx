@@ -16,7 +16,7 @@ export default function Header({ onBackToLanding, activeTab, setActiveTab, onNav
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#070708]/80 backdrop-blur-md border-b border-[#181a22] transition-colors select-none">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#070708]/80 backdrop-blur-md transition-colors select-none">
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
           {/* Brand Logo */}
           <div 
@@ -77,11 +77,11 @@ export default function Header({ onBackToLanding, activeTab, setActiveTab, onNav
         {mobileMenuOpen && (
           <motion.div
             key="mobile-menu"
-            initial={{ opacity: 0, backdropFilter: 'blur(10px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(0px)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[100] bg-[#070708]/95 flex flex-col items-center justify-center px-6 text-center"
+            className="fixed inset-0 z-[100] bg-[#070708]/60 backdrop-blur-xl flex flex-col items-center justify-center px-6 text-center"
           >
             {/* Perfectly Aligned Header in Mobile Menu */}
             <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
@@ -100,7 +100,18 @@ export default function Header({ onBackToLanding, activeTab, setActiveTab, onNav
                 className="p-2 -mr-2 text-[#888b94] hover:text-[#ded1b6] transition-colors focus:outline-none"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                  <motion.path
+                    initial={{ d: "M4 8.5L20 8.5" }}
+                    animate={{ d: "M6 6L18 18" }}
+                    transition={{ duration: 0.3, ease: "anticipate" }}
+                    strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                  />
+                  <motion.path
+                    initial={{ d: "M4 15.5L20 15.5" }}
+                    animate={{ d: "M6 18L18 6" }}
+                    transition={{ duration: 0.3, ease: "anticipate" }}
+                    strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                  />
                 </svg>
               </button>
             </div>

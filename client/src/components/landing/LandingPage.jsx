@@ -18,11 +18,12 @@ export default function LandingPage({ onLaunch, onReceive }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e6e7eb] selection:bg-[#22242b] selection:text-[#ded1b6] flex flex-col font-sans relative">
-      {/* Fixed Top Navbar without border */}
+    <div className="min-h-screen bg-[#070708] text-[#e6e7eb] relative selection:bg-[#22242b] selection:text-[#ded1b6] font-sans">
+      {/* Universal Fixed Top Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#070708]/80 backdrop-blur-md transition-colors select-none">
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3 select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3 cursor-default">
             <div className="w-6 h-6 rounded bg-[#ded1b6] flex items-center justify-center text-[#070708] font-mono font-bold text-xs">
               V
             </div>
@@ -31,44 +32,13 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </span>
           </div>
 
-          {/* Stable navigation without any bolding on hover or width shifting */}
-          <nav className="hidden sm:flex items-center gap-6 sm:gap-8 text-xs sm:text-sm font-normal tracking-wide">
-            <button
-              onClick={() => onLaunch('send')}
-              className="text-[#71747e] hover:text-[#e6e7eb] transition-colors duration-200 cursor-pointer font-normal py-1 focus:outline-none"
-            >
-              Send
-            </button>
-            <button
-              onClick={onReceive}
-              className="text-[#71747e] hover:text-[#e6e7eb] transition-colors duration-200 cursor-pointer font-normal py-1 focus:outline-none"
-            >
-              Receive
-            </button>
-            <button
-              onClick={() => onLaunch('radar')}
-              className="text-[#71747e] hover:text-[#e6e7eb] transition-colors duration-200 cursor-pointer font-normal py-1 focus:outline-none hidden sm:inline-block"
-            >
-              Radar
-            </button>
-            <button
-              onClick={scrollToHowItWorks}
-              className="text-[#71747e] hover:text-[#e6e7eb] transition-colors duration-200 cursor-pointer font-normal py-1 focus:outline-none hidden md:inline-block"
-            >
-              How It Works
-            </button>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden sm:flex items-center gap-8 text-sm font-normal">
+            <button onClick={() => onLaunch('send')} className="text-[#71747e] hover:text-[#e6e7eb] transition-colors focus:outline-none">Send</button>
+            <button onClick={onReceive} className="text-[#71747e] hover:text-[#e6e7eb] transition-colors focus:outline-none">Receive</button>
+            <button onClick={() => onLaunch('radar')} className="text-[#71747e] hover:text-[#e6e7eb] transition-colors focus:outline-none">Local Radar</button>
+            <button onClick={scrollToHowItWorks} className="text-[#71747e] hover:text-[#e6e7eb] transition-colors focus:outline-none hidden md:inline-block">How It Works</button>
           </nav>
-
-          <div className="hidden sm:block">
-            <Button
-              variant="luxury"
-              size="sm"
-              onClick={() => onLaunch('send')}
-              className="text-xs px-5 py-2 font-normal"
-            >
-              Start Transfer
-            </Button>
-          </div>
 
           {/* Mobile Hamburger Button */}
           <button
@@ -87,11 +57,11 @@ export default function LandingPage({ onLaunch, onReceive }) {
         {mobileMenuOpen && (
           <motion.div
             key="mobile-menu"
-            initial={{ opacity: 0, backdropFilter: 'blur(10px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(0px)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[100] bg-[#070708]/95 flex flex-col items-center justify-center px-6 text-center"
+            className="fixed inset-0 z-[100] bg-[#070708]/60 backdrop-blur-xl flex flex-col items-center justify-center px-6 text-center"
           >
             {/* Perfectly Aligned Header in Mobile Menu */}
             <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
@@ -108,7 +78,18 @@ export default function LandingPage({ onLaunch, onReceive }) {
                 className="p-2 -mr-2 text-[#888b94] hover:text-[#ded1b6] transition-colors focus:outline-none"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                  <motion.path
+                    initial={{ d: "M4 8.5L20 8.5" }}
+                    animate={{ d: "M6 6L18 18" }}
+                    transition={{ duration: 0.3, ease: "anticipate" }}
+                    strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                  />
+                  <motion.path
+                    initial={{ d: "M4 15.5L20 15.5" }}
+                    animate={{ d: "M6 18L18 6" }}
+                    transition={{ duration: 0.3, ease: "anticipate" }}
+                    strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                  />
                 </svg>
               </button>
             </div>
