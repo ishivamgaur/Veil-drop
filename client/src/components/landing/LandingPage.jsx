@@ -121,32 +121,33 @@ export default function LandingPage({ onLaunch, onReceive }) {
       </AnimatePresence>
 
       {/* Hero Section */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-10 pt-32 pb-32 sm:pt-44 sm:pb-44 flex flex-col items-center text-center">
+      <main className="max-w-6xl w-full mx-auto px-6 sm:px-10 pt-28 pb-24 sm:pt-44 sm:pb-44 flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl flex flex-col items-center"
+          className="max-w-3xl flex flex-col items-center w-full"
         >
-          <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] border border-[#22242b] bg-[#101114] px-3.5 py-1 rounded-full mb-8">
+          <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] border border-[#22242b] bg-[#101114] px-4 py-1.5 rounded-full mb-8">
             Private E2E Transmission
           </span>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#f2f3f7] leading-[1.18] mb-6 font-heading">
-            Send privately. Zero servers. <br />
-            <span className="text-[#ded1b6] font-serif italic font-normal">Total secrecy.</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#f2f3f7] leading-[1.15] mb-6 font-heading">
+            Send privately. <br className="sm:hidden" />
+            Zero servers. <br className="hidden sm:block" />
+            <span className="text-[#ded1b6] font-serif italic font-normal mt-2 sm:mt-0 inline-block">Total secrecy.</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-[#888b94] max-w-md font-normal leading-relaxed mb-10">
+          <p className="text-sm sm:text-base text-[#888b94] max-w-sm sm:max-w-md font-normal leading-relaxed mb-10 mx-auto">
             Direct browser-to-browser file transfers with automatic encryption and zero cloud storage.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto sm:px-0">
             <Button
               variant="luxury"
               size="md"
               onClick={() => onLaunch('send')}
-              className="w-full sm:w-auto px-7 py-3 text-xs sm:text-sm font-normal"
+              className="w-full sm:w-auto px-8 py-3.5 sm:py-3 text-[14px] sm:text-sm font-medium"
             >
               Start Transfer
             </Button>
@@ -155,7 +156,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
               variant="outline"
               size="md"
               onClick={onReceive}
-              className="w-full sm:w-auto px-7 py-3 text-xs sm:text-sm font-medium"
+              className="w-full sm:w-auto px-8 py-3.5 sm:py-3 text-[14px] sm:text-sm font-medium"
             >
               Receive Payload
             </Button>
@@ -170,9 +171,9 @@ export default function LandingPage({ onLaunch, onReceive }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-32 sm:mt-44 w-full max-w-5xl text-left"
+          className="mt-20 sm:mt-44 w-full max-w-5xl text-left"
         >
-          <div className="flex flex-col gap-8 sm:gap-10 w-full max-w-5xl mx-auto mt-12 sm:mt-14">
+          <div className="flex flex-col gap-6 sm:gap-10 w-full max-w-5xl mx-auto mt-8 sm:mt-14">
             {/* Horizontal Card 1: Connection Protocol */}
             <div className="rounded-[2rem] border border-white/[0.08] p-4 sm:p-5 group bg-[#050508] shadow-sm flex flex-col-reverse md:flex-row items-center gap-6 sm:gap-10">
               <div className="flex-1 space-y-3 px-2 sm:px-6 py-4 md:py-0 w-full">
@@ -429,7 +430,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
         </section>
 
         {/* Clean Call-to-Action Section */}
-        <section className="mt-40 sm:mt-56 w-full rounded-none sm:rounded-t-[4rem] border-t border-white/[0.04] bg-[#070708] px-6 py-20 sm:py-32 text-center flex flex-col items-center relative overflow-hidden">
+        <section className="mt-40 sm:mt-56 w-full rounded-t-[3rem] sm:rounded-t-[4rem] border-t border-white/[0.04] bg-[#070708] px-6 py-20 sm:py-32 text-center flex flex-col items-center relative overflow-hidden">
           
           {/* Subtle gradient at the very top to make it lighter near the border curve */}
           <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none"></div>
