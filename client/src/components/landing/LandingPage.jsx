@@ -12,6 +12,18 @@ export default function LandingPage({ onLaunch, onReceive }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedImage, setExpandedImage] = useState(null);
 
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const scrollToHowItWorks = () => {
     setMobileMenuOpen(false);
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });

@@ -7,8 +7,8 @@ import { io } from 'socket.io-client';
 class SocketService {
   constructor() {
     this.socket = null;
-    // In dev, connect directly to backend. In prod, connect to the same origin.
-    this.serverUrl = import.meta.env.PROD ? '/' : 'http://localhost:5000';
+    // In dev, connect to local backend. In prod, connect to VITE_API_URL or fallback to relative URL.
+    this.serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     this.isConnected = false;
   }
 

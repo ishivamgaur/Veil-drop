@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/helpers';
 
@@ -7,6 +7,18 @@ import { cn } from '../../utils/helpers';
  */
 export default function Header({ onBackToLanding, activeTab, setActiveTab, onNavigateHowItWorks }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const navItems = [
     { id: 'send', label: 'Send' },
