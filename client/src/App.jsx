@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/common/Header';
-import ToastContainer from './components/common/ToastContainer';
+import { Toaster, toast } from 'sonner';
 import RadarStage from './components/radar/RadarStage';
 import PrivateSenderStage from './components/send/PrivateSenderStage';
 import PrivateReceiverStage from './components/receive/PrivateReceiverStage';
@@ -17,21 +17,9 @@ import { generateId } from './utils/helpers';
 export default function App() {
   const [view, setView] = useState('landing'); // 'landing' | 'app'
   const [activeTab, setActiveTab] = useState('send'); // 'send' | 'receive' | 'radar'
-  const [toasts, setToasts] = useState([
-    { id: 't1', message: 'End-to-end encryption engine ready. Zero server copies.' }
-  ]);
-
-  const removeToast = useCallback((id) => {
-    setToasts((current) => current.filter((t) => t.id !== id));
-  }, []);
-
   const addToast = useCallback((message) => {
-    const id = 't-' + generateId();
-    setToasts((current) => [...current, { id, message }]);
-    setTimeout(() => {
-      removeToast(id);
-    }, 4000);
-  }, [removeToast]);
+    toast(message);
+  }, []);
 
   const { peers, selectedPeer, toggleSelectPeer } = usePeers('Sender-Host', addToast);
   const { activeTransfers, historyVault, initiateBeam, clearHistory } = useTransfers(addToast, selectedPeer);
@@ -93,7 +81,7 @@ export default function App() {
       />
 
       {/* Primary Universal Stage (Exactly max-w-6xl across every page for consistent UX) */}
-      <main className="max-w-6xl w-full mx-auto px-6 sm:px-10 pt-32 pb-36 flex-1 flex flex-col items-center justify-center">
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-10 pt-32 pb-32 sm:pt-44 sm:pb-44 flex-1 flex flex-col items-center">
         <div className="w-full">
           {activeTab === 'send' && (
             <PrivateSenderStage initiateBeam={initiateBeam} addToast={addToast} />
@@ -170,7 +158,7 @@ export default function App() {
 
       {/* Universal Footer */}
       <footer className="border-t border-[#181a22] py-8 text-center text-[11px] font-mono text-[#626570] bg-[#070708]">
-        <div className="max-w-6xl w-full mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span>VEIL DROP • DIRECT PRIVATE TRANSFERS</span>
           <div className="flex items-center gap-6">
             <span className="text-[#ded1b6]">P2P TUNNELS ONLINE</span>
@@ -180,8 +168,20 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Interactive Floating Toast Feedback */}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      {/* Luxury Minimalist Sonner Toasts */}
+      <Toaster 
+        position="bottom-center"
+        toastOptions={{
+          style: { 
+            background: '#0b0c10', 
+            border: '1px solid #181a26', 
+            color: '#ded1b6',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            borderRadius: '12px'
+          }
+        }}
+      />
     </div>
   );
 }

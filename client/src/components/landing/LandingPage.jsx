@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import BentoCard from './BentoCard';
 
@@ -8,7 +8,10 @@ import BentoCard from './BentoCard';
  * Zero cards, zero borders, pure fluid linear studio aesthetic.
  */
 export default function LandingPage({ onLaunch, onReceive }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const scrollToHowItWorks = () => {
+    setMobileMenuOpen(false);
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -16,7 +19,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
     <div className="min-h-screen bg-[#070708] text-[#e6e7eb] selection:bg-[#22242b] selection:text-[#ded1b6] flex flex-col font-sans relative">
       {/* Fixed Top Navbar without border */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#070708]/80 backdrop-blur-md transition-colors select-none">
-        <div className="max-w-6xl w-full mx-auto px-6 sm:px-10 py-5 flex items-center justify-between">
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
           <div className="flex items-center gap-3 select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="w-6 h-6 rounded bg-[#ded1b6] flex items-center justify-center text-[#070708] font-mono font-bold text-xs">
               V
@@ -27,7 +30,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
           </div>
 
           {/* Stable navigation without any bolding on hover or width shifting */}
-          <nav className="flex items-center gap-6 sm:gap-8 text-xs sm:text-sm font-normal tracking-wide">
+          <nav className="hidden sm:flex items-center gap-6 sm:gap-8 text-xs sm:text-sm font-normal tracking-wide">
             <button
               onClick={() => onLaunch('send')}
               className="text-[#71747e] hover:text-[#e6e7eb] transition-colors duration-200 cursor-pointer font-normal py-1 focus:outline-none"
@@ -54,7 +57,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </button>
           </nav>
 
-          <div>
+          <div className="hidden sm:block">
             <Button
               variant="luxury"
               size="sm"
@@ -64,11 +67,59 @@ export default function LandingPage({ onLaunch, onReceive }) {
               Start Transfer
             </Button>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="sm:hidden text-[#ded1b6] p-2 -mr-2 relative z-50 focus:outline-none"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 8.5h16M4 15.5h16" />
+            </svg>
+          </button>
         </div>
       </header>
 
+      {/* Full Screen Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] bg-[#070708] flex flex-col items-center justify-center space-y-10 px-6 text-center"
+          >
+            {/* Perfectly Aligned Close Button Wrapper */}
+            <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex justify-end">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 -mr-2 text-[#888b94] hover:text-[#ded1b6] transition-colors focus:outline-none"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <button onClick={() => { onLaunch('send'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+              Send
+            </button>
+            <button onClick={() => { onReceive(); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+              Receive
+            </button>
+            <button onClick={() => { onLaunch('radar'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+              Radar
+            </button>
+            <button onClick={scrollToHowItWorks} className="text-4xl font-heading tracking-tight text-[#71747e] mt-4">
+              How It Works
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
-      <main className="max-w-6xl w-full mx-auto px-6 sm:px-10 pt-36 pb-32 sm:pt-44 sm:pb-44 flex flex-col items-center text-center">
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-10 pt-32 pb-32 sm:pt-44 sm:pb-44 flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,6 +160,8 @@ export default function LandingPage({ onLaunch, onReceive }) {
           </div>
         </motion.div>
 
+
+
         {/* Telemetry Specifications Row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -117,56 +170,56 @@ export default function LandingPage({ onLaunch, onReceive }) {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-32 sm:mt-44 w-full max-w-5xl text-left"
         >
-          {/* Faded Gradient Upper Divider Line (0% -> 20% -> 0%) */}
-          <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent mb-12 sm:mb-14" />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-12">
-            {/* Column 1: Connection Protocol */}
-            <div className="space-y-2 md:border-r border-white/[0.08] md:pr-8">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#221f19] to-[#14120e] border border-[#ded1b6]/20 flex items-center justify-center text-[#ded1b6] shadow-sm shrink-0">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v.958m12 0A2.25 2.25 0 0118 9.75v.75m-15 0v-.75a2.25 2.25 0 011.5-2.126" />
-                  </svg>
+          <div className="flex flex-col gap-8 sm:gap-10 w-full max-w-5xl mx-auto mt-12 sm:mt-14">
+            {/* Horizontal Card 1: Connection Protocol */}
+            <div className="rounded-[2rem] border border-white/[0.08] p-4 sm:p-5 group bg-[#050508] shadow-sm flex flex-col-reverse md:flex-row items-center gap-6 sm:gap-10">
+              <div className="flex-1 space-y-3 px-2 sm:px-6 py-4 md:py-0 w-full">
+                <div className="text-[10px] font-mono text-[#ded1b6] uppercase tracking-widest font-medium mb-3">
+                  01 // CONNECTION PROTOCOL
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-mono text-[#ded1b6] uppercase tracking-widest">
-                  CONNECTION PROTOCOL
+                <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">Device to Device</div>
+                <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-md">
+                  Direct high-speed P2P stream globally. Data packets bypass external servers entirely for pure transmission.
                 </div>
               </div>
-              <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">Device to Device</div>
-              <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">Direct high-speed P2P stream globally</div>
+              <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
+                <img src="/connection_protocol_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+              </div>
             </div>
 
-            {/* Column 2: Privacy Scheme */}
-            <div className="space-y-2 md:border-r border-white/[0.08] md:pr-8">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#122b22] to-[#0a1813] border border-[#34d399]/20 flex items-center justify-center text-[#34d399] shadow-sm shrink-0">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
+            {/* Horizontal Card 2: Privacy Scheme */}
+            <div className="rounded-[2rem] border border-white/[0.08] p-4 sm:p-5 group bg-[#050508] shadow-sm flex flex-col-reverse md:flex-row-reverse items-center gap-6 sm:gap-10">
+              <div className="flex-1 space-y-3 px-2 sm:px-6 py-4 md:py-0 w-full">
+                <div className="text-[10px] font-mono text-[#34d399] uppercase tracking-widest font-medium mb-3">
+                  02 // PRIVACY SCHEME
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-mono text-[#34d399] uppercase tracking-widest">
-                  PRIVACY SCHEME
+                <div className="text-xl sm:text-2xl font-medium text-[#ded1b6] font-heading">End-to-End Encrypted</div>
+                <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-md">
+                  Locked before leaving your machine. URL fragment decryption keys never touch network boundaries.
                 </div>
               </div>
-              <div className="text-xl sm:text-2xl font-medium text-[#ded1b6] font-heading">End-to-End Encrypted</div>
-              <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">Locked before leaving your machine</div>
+              <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
+                <img src="/privacy_scheme_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+              </div>
             </div>
 
-            {/* Column 3: Cloud Retention */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#162545] to-[#0c1426] border border-[#60a5fa]/20 flex items-center justify-center text-[#60a5fa] shadow-sm shrink-0">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
-                  </svg>
+            {/* Horizontal Card 3: Cloud Retention */}
+            <div className="rounded-[2rem] border border-white/[0.08] p-4 sm:p-5 group bg-[#050508] shadow-sm flex flex-col-reverse md:flex-row items-center gap-6 sm:gap-10">
+              <div className="flex-1 space-y-3 px-2 sm:px-6 py-4 md:py-0 w-full">
+                <div className="text-[10px] font-mono text-[#60a5fa] uppercase tracking-widest font-medium mb-3">
+                  03 // CLOUD RETENTION
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-mono text-[#60a5fa] uppercase tracking-widest">
-                  CLOUD RETENTION
+                <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">0.0 Bytes Saved</div>
+                <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-md">
+                  Zero persistent storage. Files are buffered purely in volatile browser RAM during transmission.
                 </div>
               </div>
-              <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">0.0 Bytes Saved</div>
-              <div className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">Files never remain on cloud servers</div>
+              <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
+                <img src="/cloud_retention_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -174,7 +227,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
         {/* Compact Micro-Bento Grid with Exact Hero-Section Spacing */}
         <section id="how-it-works" className="mt-32 sm:mt-44 w-full text-left scroll-mt-32">
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] bg-[#101114] px-4 py-1 rounded-full mb-8">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] border border-[#22242b] bg-[#101114] px-3.5 py-1 rounded-full mb-8">
               CORE CAPABILITIES // WHY VEILDROP
             </span>
 
@@ -206,7 +259,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
               subtitle="Conventional platforms archive files on vulnerable central disks. Your decryption keys exist strictly inside secret URL hash fragments (#k=) that never transmit over network headers."
               actionText="VERIFY CIPHER SPECIFICATION"
               actionColor="text-[#ded1b6]"
-              onClick={() => window.open('https://github.com', '_blank')}
+              onClick={() => window.open('https://github.com/ishivamgaur/Veil-drop', '_blank')}
             />
 
             {/* Cell 2: 1 Column - Titanium Champagne Grain */}
@@ -262,7 +315,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
         {/* Clean Symmetrical Editorial Architecture & Protocol Showcase */}
         <section className="mt-32 sm:mt-44 w-full max-w-5xl mx-auto space-y-16 sm:space-y-24">
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] bg-[#101114] px-4 py-1 rounded-full mb-8">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] border border-[#22242b] bg-[#101114] px-3.5 py-1 rounded-full mb-8">
               WORKFLOW // DIRECT TUNNEL PROTOCOL
             </span>
             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#f2f3f7] leading-[1.18] mb-6 font-heading">
@@ -273,86 +326,91 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </p>
           </div>
 
-          <div className="w-full text-left">
-            {/* Faded Gradient Divider Line (0% -> 20% -> 0%) */}
-            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent mb-12 sm:mb-14" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-12">
+          <div className="w-full text-left mt-12 sm:mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+              
               {/* Step 01: STAGE PAYLOAD */}
-              <div className="space-y-2 md:border-r border-white/[0.08] md:pr-8">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#221f19] to-[#14120e] border border-[#ded1b6]/20 flex items-center justify-center text-[#ded1b6] shadow-sm shrink-0">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A4.502 4.502 0 0118 19.5H6.75z" />
-                    </svg>
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] font-mono text-[#ded1b6] uppercase tracking-widest font-medium">
-                    STAGE PAYLOAD
-                  </div>
+              <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
+                <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
+                  <img src="/stage_payload_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
-                <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">RAM Buffer Staging</div>
-                <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">
-                  Files load directly into volatile browser RAM. Data is chunked in memory with zero cloud storage.
-                </p>
+                
+                <div className="px-3 pb-4">
+                  <div className="text-[10px] font-mono text-[#ded1b6] uppercase tracking-widest font-medium mb-4">
+                    01 // STAGE PAYLOAD
+                  </div>
+                  <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading mb-3">RAM Buffer Staging</div>
+                  <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-sm">
+                    Files load directly into volatile browser RAM. Data is chunked in memory with zero cloud storage.
+                  </p>
+                </div>
               </div>
 
               {/* Step 02: CIPHER LINK */}
-              <div className="space-y-2 md:border-r border-white/[0.08] md:pr-8">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#122b22] to-[#0a1813] border border-[#34d399]/20 flex items-center justify-center text-[#34d399] shadow-sm shrink-0">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                    </svg>
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] font-mono text-[#34d399] uppercase tracking-widest font-medium">
-                    CIPHER LINK
-                  </div>
+              <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
+                <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
+                  <img src="/cipher_link_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
-                <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">Ephemeral AES Key</div>
-                <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">
-                  256-bit key embeds inside secret URL fragment (<code className="text-[#34d399]">#k=</code>), invisible to HTTP servers.
-                </p>
+                
+                <div className="px-3 pb-4">
+                  <div className="text-[10px] font-mono text-[#34d399] uppercase tracking-widest font-medium mb-4">
+                    02 // CIPHER LINK
+                  </div>
+                  <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading mb-3">Ephemeral AES Key</div>
+                  <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-sm">
+                    256-bit key embeds inside secret URL fragment (<code className="text-[#34d399]">#k=</code>), invisible to HTTP servers.
+                  </p>
+                </div>
               </div>
 
               {/* Step 03: INSTANT BEAM */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#162545] to-[#0c1426] border border-[#60a5fa]/20 flex items-center justify-center text-[#60a5fa] shadow-sm shrink-0">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                    </svg>
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] font-mono text-[#60a5fa] uppercase tracking-widest font-medium">
-                    INSTANT BEAM
-                  </div>
+              <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
+                <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
+                  <img src="/instant_beam_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
-                <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading">Direct WebRTC Stream</div>
-                <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed">
-                  P2P encrypted tunnel streams data directly between browsers at maximum network speed.
-                </p>
+                
+                <div className="px-3 pb-4">
+                  <div className="text-[10px] font-mono text-[#60a5fa] uppercase tracking-widest font-medium mb-4">
+                    03 // INSTANT BEAM
+                  </div>
+                  <div className="text-xl sm:text-2xl font-medium text-[#ffffff] font-heading mb-3">Direct WebRTC Stream</div>
+                  <p className="text-xs sm:text-sm text-[#888b94] font-normal leading-relaxed max-w-sm">
+                    P2P encrypted tunnel streams data directly between browsers at maximum network speed.
+                  </p>
+                </div>
               </div>
+
             </div>
           </div>
         </section>
 
-        {/* Rich Grainy Call-to-Action Section */}
-        <section className="mt-40 sm:mt-56 w-full max-w-4xl mx-auto rounded-3xl bg-gradient-to-tr from-[#1b1916] via-[#11100e] to-[#0a0a0d] film-grain p-12 sm:p-20 text-center flex flex-col items-center relative overflow-hidden shadow-none">
-          <div className="absolute inset-0 bg-gradient-to-t from-white/[0.02] to-transparent pointer-events-none" />
-          <span className="text-[10px] font-mono text-[#ded1b6] uppercase tracking-widest bg-[#27231c] px-4 py-1.5 rounded-full mb-6 relative z-10 shadow-sm">
+        {/* Clean Call-to-Action Section */}
+        <section className="mt-40 sm:mt-56 w-full rounded-none sm:rounded-t-[4rem] border-t border-white/[0.04] bg-[#070708] px-6 py-20 sm:py-32 text-center flex flex-col items-center relative overflow-hidden">
+          
+          {/* Subtle gradient at the very top to make it lighter near the border curve */}
+          <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none"></div>
+
+          {/* Heavy noise for texture */}
+          <div className="absolute inset-0 opacity-[0.25] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+          
+          <span className="text-[11px] font-mono uppercase tracking-widest text-[#888b94] border border-[#22242b] bg-[#101114] px-3.5 py-1 rounded-full mb-8 relative z-10">
             GET STARTED // VOLATILE STREAMING
           </span>
-          <h2 className="text-3xl sm:text-5xl font-medium text-[#ffffff] mb-4 font-heading tracking-tight relative z-10">
+          <h2 className="text-3xl sm:text-5xl font-medium text-[#ffffff] mb-4 font-heading tracking-tight relative z-10 max-w-3xl">
             Ready for instantaneous streaming?
           </h2>
-          <p className="text-xs sm:text-sm text-[#9e9990] max-w-md mb-10 font-normal leading-relaxed relative z-10">
+          <p className="text-sm sm:text-base text-[#9e9990] max-w-xl mb-12 font-normal leading-relaxed relative z-10">
             Launch a direct end-to-end encrypted channel between your devices right now.
           </p>
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="relative z-10">
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="relative z-10 mt-2">
             <Button
               variant="luxury"
-              size="md"
+              size="lg"
               onClick={() => onLaunch('send')}
-              className="px-10 py-4 text-xs sm:text-sm font-medium rounded-full uppercase tracking-wider bg-[#ffffff] text-[#050506] hover:bg-[#ded1b6] transition-colors shadow-xl"
+              className="px-12 py-5 text-sm font-medium rounded-full uppercase tracking-wider bg-[#ded1b6] text-[#050506] hover:bg-[#ffffff] transition-colors shadow-2xl shadow-[#ded1b6]/10"
             >
               Start Stream Now
             </Button>
@@ -360,17 +418,46 @@ export default function LandingPage({ onLaunch, onReceive }) {
         </section>
       </main>
 
-      {/* Sleek Minimalist Footer */}
-      <footer className="mt-auto py-14 text-center text-[11px] font-mono text-[#555866] bg-[#050608]">
-        <div className="max-w-6xl w-full mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <span className="text-[#8a8e9e]">VEILDROP // PURE POINT-TO-POINT TRANSFERS</span>
-          <div className="flex items-center gap-8 font-normal text-[#8a8e9e]">
+      {/* Mega-Typography Footer (Modern Tech Aesthetic) */}
+      <footer className="mt-auto pt-10 sm:pt-14 pb-0 text-center bg-[#070708] border-t border-white/[0.02] relative z-10 overflow-hidden flex flex-col items-center">
+        
+        {/* Top Links Row */}
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-10 flex flex-col md:flex-row items-center justify-between gap-6 mb-6 sm:mb-10 text-[11px] font-mono text-[#555866]">
+          <span className="text-[#8a8e9e] tracking-widest">P2P ENCRYPTED TRANSFER PROTOCOL</span>
+          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 font-normal text-[#8a8e9e]">
             <span className="hover:text-[#ffffff] transition-colors cursor-pointer" onClick={() => onLaunch('send')}>Send</span>
             <span className="hover:text-[#ffffff] transition-colors cursor-pointer" onClick={() => onReceive()}>Receive</span>
             <span className="hover:text-[#ffffff] transition-colors cursor-pointer" onClick={() => onLaunch('radar')}>Local Radar</span>
-            <span className="hover:text-[#ffffff] transition-colors cursor-pointer" onClick={() => window.open('https://github.com', '_blank')}>Security</span>
+            <span className="hover:text-[#ffffff] transition-colors cursor-pointer flex items-center gap-2" onClick={() => window.open('https://github.com/ishivamgaur', '_blank')}>
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              @ishivamgaur
+            </span>
           </div>
         </div>
+
+        {/* Massive Brand Typography - SVG Auto-Scales perfectly to any container width */}
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-10 mt-2">
+          <svg viewBox="0 0 1000 180" className="w-full h-auto pointer-events-none select-none overflow-visible">
+            <defs>
+              <linearGradient id="textGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.07)" />
+                <stop offset="100%" stopColor="transparent" />
+              </linearGradient>
+            </defs>
+            <text 
+              x="0" 
+              y="85%" 
+              textLength="1000"
+              lengthAdjust="spacing"
+              className="font-black font-heading" 
+              fill="url(#textGradient)" 
+              style={{ fontSize: '190px' }}
+            >
+              VEILDROP
+            </text>
+          </svg>
+        </div>
+
       </footer>
     </div>
   );
