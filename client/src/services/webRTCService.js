@@ -167,7 +167,7 @@ class WebRTCService {
         // Veil Privacy Layer: Decrypt AES-GCM chunk if key is present
         if (this.cryptoKey) {
           try {
-            if (this.fileBuffer.length === 0) {
+            if (this.fileBuffer.length === 0 && !this.receivedBytes) {
               const encryptedHex = Array.from(new Uint8Array(chunkData).slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ');
               console.log('%c--- 🔐 VEIL PRIVACY LAYER: DECRYPTION PROOF ---', 'color: #34d399; font-weight: bold');
               console.log(`%c[Receiver] AES-GCM Ciphertext : ${encryptedHex}`, 'color: #ef4444');
@@ -188,7 +188,14 @@ class WebRTCService {
           }
         }
 
-        this.fileBuffer.push(chunkData);
+        if (this.fileWritableStream) {
+          // Stream directly to the hard drive!
+          await this.fileWritableStream.write(chunkData);
+        } else {
+          // Fallback to RAM buffer
+          this.fileBuffer.push(chunkData);
+        }
+        
         // We calculate received bytes based on the ORIGINAL chunk data (decrypted length)
         this.receivedBytes += chunkData.byteLength;
         
@@ -285,24 +292,29 @@ class WebRTCService {
     window.dispatchEvent(new CustomEvent('webrtc:transfer_complete'));
   }
 
-  assembleAndDownloadFile() {
+  async assembleAndDownloadFile() {
     if (this.transferFailed) {
       console.warn('⚠️ [WebRTC] Aborting download assembly due to critical transfer/decryption failure.');
       this.reset();
       return;
     }
 
-    const blob = new Blob(this.fileBuffer);
-    const url = URL.createObjectURL(blob);
-    
-    // Auto-download the file in the receiver's browser
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = this.currentFileName || 'veildrop-file';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (this.fileWritableStream) {
+      console.log('💾 [WebRTC] Closing File System Stream. File fully saved to disk!');
+      await this.fileWritableStream.close();
+    } else {
+      const blob = new Blob(this.fileBuffer);
+      const url = URL.createObjectURL(blob);
+      
+      // Auto-download the file in the receiver's browser
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = this.currentFileName || 'veildrop-file';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
 
     window.dispatchEvent(new CustomEvent('webrtc:transfer_complete'));
     this.reset();
@@ -322,6 +334,7 @@ class WebRTCService {
     this.expectedSize = 0;
     this.targetPeerId = null;
     this.transferFailed = false;
+    this.fileWritableStream = null;
   }
 }
 

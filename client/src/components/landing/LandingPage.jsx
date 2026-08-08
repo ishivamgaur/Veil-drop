@@ -10,6 +10,7 @@ import Footer from '../common/Footer';
  */
 export default function LandingPage({ onLaunch, onReceive }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedImage, setExpandedImage] = useState(null);
 
   const scrollToHowItWorks = () => {
     setMobileMenuOpen(false);
@@ -184,7 +185,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
                 </div>
               </div>
               <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
-                <img src="/connection_protocol_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <img src="/connection_protocol_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                 <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
               </div>
             </div>
@@ -201,7 +202,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
                 </div>
               </div>
               <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
-                <img src="/privacy_scheme_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <img src="/privacy_scheme_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                 <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
               </div>
             </div>
@@ -218,7 +219,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
                 </div>
               </div>
               <div className="w-full md:w-[240px] lg:w-[280px] shrink-0 aspect-[16/9] rounded-2xl overflow-hidden relative border border-white/[0.04]">
-                <img src="/cloud_retention_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                <img src="/cloud_retention_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                 <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
               </div>
             </div>
@@ -333,7 +334,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
               {/* Step 01: STAGE PAYLOAD */}
               <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
                 <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
-                  <img src="/stage_payload_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <img src="/stage_payload_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                   <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
                 
@@ -351,7 +352,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
               {/* Step 02: CIPHER LINK */}
               <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
                 <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
-                  <img src="/cipher_link_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <img src="/cipher_link_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                   <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
                 
@@ -369,7 +370,7 @@ export default function LandingPage({ onLaunch, onReceive }) {
               {/* Step 03: INSTANT BEAM */}
               <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm">
                 <div className="w-full aspect-[16/9] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] mb-6">
-                  <img src="/instant_beam_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+                  <img src="/instant_beam_sm.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity " />
                   <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
                 </div>
                 
@@ -402,25 +403,25 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
             {/* Architecture Card 1 */}
-            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm h-full">
+            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm w-full">
               <div className="text-[10px] font-mono text-[#ded1b6] uppercase tracking-widest font-medium px-3 pt-2 mb-3">
                 SYSTEM TOPOLOGY
               </div>
-              <div className="w-full aspect-[4/3] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04]">
-                <img src="/architecture_diagram.jpg" alt="Veil Drop Architecture Diagram" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+              <div className="w-full rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] bg-[#000000]">
+                <motion.img layoutId="/architecture_diagram.jpg" src="/architecture_diagram.jpg" alt="Veil Drop Architecture Diagram" className="w-full h-auto object-contain cursor-zoom-in block relative z-10" onClick={() => setExpandedImage('/architecture_diagram.jpg')} />
                 <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
               </div>
             </div>
 
             {/* Architecture Card 2 */}
-            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm h-full">
+            <div className="flex flex-col group bg-[#050508] border border-white/[0.08] rounded-[2rem] p-3 sm:p-4 shadow-sm w-full">
               <div className="text-[10px] font-mono text-[#34d399] uppercase tracking-widest font-medium px-3 pt-2 mb-3">
                 CRYPTOGRAPHIC PIPELINE
               </div>
-              <div className="w-full aspect-[4/3] rounded-[1.25rem] overflow-hidden relative border border-white/[0.04]">
-                <img src="/detailed_encryption_flow.jpg" alt="Detailed Encryption Flow" className="absolute inset-0 w-full h-full object-cover filter contrast-[1.1] grayscale-[0.5] mix-blend-luminosity transform group-hover:scale-[1.03] transition-transform duration-700 ease-out" />
+              <div className="w-full rounded-[1.25rem] overflow-hidden relative border border-white/[0.04] bg-[#000000]">
+                <motion.img layoutId="/detailed_encryption_flow.jpg" src="/detailed_encryption_flow.jpg" alt="Detailed Encryption Flow" className="w-full h-auto object-contain cursor-zoom-in block relative z-10" onClick={() => setExpandedImage('/detailed_encryption_flow.jpg')} />
                 <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
               </div>
             </div>
@@ -456,6 +457,36 @@ export default function LandingPage({ onLaunch, onReceive }) {
             </Button>
           </motion.div>
         </section>
+        {/* Lightbox Modal */}
+        <AnimatePresence>
+          {expandedImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setExpandedImage(null)}
+              className="fixed inset-0 z-[200] bg-[#000000]/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-10 cursor-zoom-out"
+            >
+              <motion.img
+                layoutId={expandedImage}
+                src={expandedImage}
+                alt="Expanded view"
+                className="max-w-5xl w-full max-h-[90vh] object-contain rounded-xl shadow-2xl border border-white/[0.1] relative z-10 filter-none"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Close button */}
+              <button
+                onClick={() => setExpandedImage(null)}
+                className="absolute top-6 right-6 p-2 bg-[#101114] rounded-full text-[#888b94] hover:text-[#ded1b6] border border-white/[0.1] transition-colors focus:outline-none"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Mega-Typography Footer (Modern Tech Aesthetic) */}
