@@ -76,14 +76,25 @@ export default function Header({ onBackToLanding, activeTab, setActiveTab, onNav
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-[#070708] flex flex-col items-center justify-center space-y-10 px-6 text-center"
+            key="mobile-menu"
+            initial={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(0px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="fixed inset-0 z-[100] bg-[#070708]/95 flex flex-col items-center justify-center px-6 text-center"
           >
-            {/* Perfectly Aligned Close Button Wrapper */}
-            <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex justify-end">
+            {/* Perfectly Aligned Header in Mobile Menu */}
+            <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
+              <div 
+                className="flex items-center gap-3 select-none"
+              >
+                <div className="w-6 h-6 rounded bg-[#ded1b6] flex items-center justify-center text-[#070708] font-mono font-bold text-xs">
+                  V
+                </div>
+                <span className="text-base font-semibold tracking-tight text-[#f2f3f7] font-heading">
+                  VEILDROP
+                </span>
+              </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 -mr-2 text-[#888b94] hover:text-[#ded1b6] transition-colors focus:outline-none"
@@ -94,31 +105,39 @@ export default function Header({ onBackToLanding, activeTab, setActiveTab, onNav
               </button>
             </div>
 
-            {navItems.map((item) => (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
+              className="flex flex-col items-center justify-center space-y-10"
+            >
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "text-4xl font-heading tracking-tight transition-colors focus:outline-none",
+                    activeTab === item.id ? "text-[#ded1b6]" : "text-[#f2f3f7]"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+
               <button
-                key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
+                  onBackToLanding();
                   setMobileMenuOpen(false);
                 }}
-                className={cn(
-                  "text-4xl font-heading tracking-tight transition-colors focus:outline-none",
-                  activeTab === item.id ? "text-[#ded1b6]" : "text-[#f2f3f7]"
-                )}
+                className="text-4xl font-heading tracking-tight text-[#71747e] focus:outline-none mt-4"
               >
-                {item.label}
+                Home
               </button>
-            ))}
-
-            <button
-              onClick={() => {
-                onBackToLanding();
-                setMobileMenuOpen(false);
-              }}
-              className="text-4xl font-heading tracking-tight text-[#71747e] focus:outline-none mt-4"
-            >
-              Home
-            </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

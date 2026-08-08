@@ -86,14 +86,23 @@ export default function LandingPage({ onLaunch, onReceive }) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-[#070708] flex flex-col items-center justify-center space-y-10 px-6 text-center"
+            key="mobile-menu"
+            initial={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(0px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="fixed inset-0 z-[100] bg-[#070708]/95 flex flex-col items-center justify-center px-6 text-center"
           >
-            {/* Perfectly Aligned Close Button Wrapper */}
-            <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex justify-end">
+            {/* Perfectly Aligned Header in Mobile Menu */}
+            <div className="absolute top-0 left-0 right-0 max-w-6xl w-full mx-auto px-4 sm:px-10 py-3 sm:py-5 flex items-center justify-between">
+              <div className="flex items-center gap-3 select-none">
+                <div className="w-6 h-6 rounded bg-[#ded1b6] flex items-center justify-center text-[#070708] font-mono font-bold text-xs">
+                  V
+                </div>
+                <span className="text-base font-semibold tracking-tight text-[#f2f3f7] font-heading">
+                  VEILDROP
+                </span>
+              </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 -mr-2 text-[#888b94] hover:text-[#ded1b6] transition-colors focus:outline-none"
@@ -104,18 +113,26 @@ export default function LandingPage({ onLaunch, onReceive }) {
               </button>
             </div>
 
-            <button onClick={() => { onLaunch('send'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
-              Send
-            </button>
-            <button onClick={() => { onReceive(); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
-              Receive
-            </button>
-            <button onClick={() => { onLaunch('radar'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
-              Radar
-            </button>
-            <button onClick={scrollToHowItWorks} className="text-4xl font-heading tracking-tight text-[#71747e] mt-4">
-              How It Works
-            </button>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
+              className="flex flex-col items-center justify-center space-y-10"
+            >
+              <button onClick={() => { onLaunch('send'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+                Send
+              </button>
+              <button onClick={() => { onReceive(); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+                Receive
+              </button>
+              <button onClick={() => { onLaunch('radar'); setMobileMenuOpen(false); }} className="text-4xl font-heading tracking-tight text-[#f2f3f7]">
+                Radar
+              </button>
+              <button onClick={scrollToHowItWorks} className="text-4xl font-heading tracking-tight text-[#71747e] mt-4">
+                How It Works
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -132,13 +149,13 @@ export default function LandingPage({ onLaunch, onReceive }) {
             Private E2E Transmission
           </span>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#f2f3f7] leading-[1.15] mb-6 font-heading">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-[#f2f3f7] leading-[1.15] mb-5 sm:mb-6 font-heading w-full max-w-[22rem] sm:max-w-3xl mx-auto px-2">
             Send privately. <br className="sm:hidden" />
             Zero servers. <br className="hidden sm:block" />
             <span className="text-[#ded1b6] font-serif italic font-normal mt-2 sm:mt-0 inline-block">Total secrecy.</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-[#888b94] max-w-sm sm:max-w-md font-normal leading-relaxed mb-10 mx-auto">
+          <p className="text-[15px] sm:text-lg text-[#888b94] w-[90%] sm:w-full max-w-[320px] sm:max-w-[480px] font-normal leading-relaxed mb-10 mx-auto">
             Direct browser-to-browser file transfers with automatic encryption and zero cloud storage.
           </p>
 

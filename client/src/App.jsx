@@ -97,43 +97,68 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (view === 'landing') {
-    return <LandingPage onLaunch={handleLaunch} onReceive={() => handleLaunch('receive')} />;
-  }
-
   return (
-    <div className="min-h-screen bg-[#070708] text-[#e6e7eb] relative selection:bg-[#22242b] selection:text-[#ded1b6] font-sans flex flex-col justify-between">
-      {/* Fixed Top Navbar with Normal Navlinks */}
-      <Header
-        onBackToLanding={handleBackToLanding}
-        activeTab={activeTab}
-        setActiveTab={handleTabSelect}
-        onNavigateHowItWorks={() => {
-          handleBackToLanding();
-          setTimeout(() => {
-            document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-          }, 100);
-        }}
-      />
+    <AnimatePresence mode="wait">
+      {view === 'landing' ? (
+        <motion.div
+          key="landing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          <LandingPage onLaunch={handleLaunch} onReceive={() => handleLaunch('receive')} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="app"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="min-h-screen bg-[#070708] text-[#e6e7eb] relative selection:bg-[#22242b] selection:text-[#ded1b6] font-sans flex flex-col justify-between"
+        >
+          {/* Fixed Top Navbar with Normal Navlinks */}
+          <Header
+            onBackToLanding={handleBackToLanding}
+            activeTab={activeTab}
+            setActiveTab={handleTabSelect}
+            onNavigateHowItWorks={() => {
+              handleBackToLanding();
+              setTimeout(() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }, 500); // Wait for transition
+            }}
+          />
 
-      {/* Primary Universal Stage (Exactly max-w-6xl across every page for consistent UX) */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-10 pt-32 pb-32 sm:pt-44 sm:pb-44 flex-1 flex flex-col items-center">
-        <div className="w-full">
-          {activeTab === 'send' && (
-            <PrivateSenderStage initiateBeam={initiateBeam} addToast={addToast} />
-          )}
-          {activeTab === 'receive' && (
-            <PrivateReceiverStage addToast={addToast} />
-          )}
-          {activeTab === 'radar' && (
-            <RadarStage
-              peers={peers}
-              selectedPeer={selectedPeer}
-              toggleSelectPeer={toggleSelectPeer}
-              initiateBeam={initiateBeam}
-            />
-          )}
-        </div>
+          {/* Primary Universal Stage */}
+          <main className="max-w-6xl w-full mx-auto px-4 sm:px-10 pt-32 pb-32 sm:pt-44 sm:pb-44 flex-1 flex flex-col items-center">
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="w-full"
+              >
+                {activeTab === 'send' && (
+                  <PrivateSenderStage initiateBeam={initiateBeam} addToast={addToast} />
+                )}
+                {activeTab === 'receive' && (
+                  <PrivateReceiverStage addToast={addToast} />
+                )}
+                {activeTab === 'radar' && (
+                  <RadarStage
+                    peers={peers}
+                    selectedPeer={selectedPeer}
+                    toggleSelectPeer={toggleSelectPeer}
+                    initiateBeam={initiateBeam}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
 
         {/* Floating Active Stream Progress Bar (Zero Boxy Bento Cards!) */}
         <AnimatePresence>
@@ -307,6 +332,8 @@ export default function App() {
           }
         }}
       />
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
