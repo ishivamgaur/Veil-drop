@@ -159,6 +159,7 @@ class WebRTCService {
 
   setupDataChannel(channel) {
     channel.binaryType = 'arraybuffer';
+    channel.bufferedAmountLowThreshold = 1024 * 1024; // 1MB threshold for backpressure
     
     channel.onopen = () => {
       console.log('🟢 [WebRTC DataChannel] Open & Ready for high-speed transfer!');
@@ -238,7 +239,7 @@ class WebRTCService {
     };
   }
 
-  // Sender: Slices the file into 64KB ArrayBuffer chunks and blasts it through DataChannel
+  // Sender: Slices the file into large ArrayBuffer chunks from disk, then blasts 16KB network chunks through DataChannel
   async sendFile(file) {
     if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
       console.error('DataChannel is not open yet!');
@@ -246,64 +247,70 @@ class WebRTCService {
     }
 
     console.log(`🚀 [WebRTC] Starting transmission of ${file.name} (${file.size} bytes)`);
-    // Lowered to 16KB to ensure encrypted payload (16KB + 28 bytes) easily fits within the 64KB max SCTP message limit!
-    const chunkSize = 16 * 1024; 
+    const NETWORK_CHUNK_SIZE = 16 * 1024; // 16KB network chunks to fit SCTP message limits
+    const DISK_CHUNK_SIZE = 4 * 1024 * 1024; // Read 4MB from disk at once to save I/O overhead
+    
     let offset = 0;
     this.transferStartTime = performance.now();
-
-    const readSlice = (offset) => {
-      return new Promise((resolve, reject) => {
-        const slice = file.slice(offset, offset + chunkSize);
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(slice);
-      });
-    };
+    let lastProgressUpdate = performance.now();
 
     while (offset < file.size) {
-      // Respect backpressure: if buffer is full, wait a bit
-      if (this.dataChannel.bufferedAmount > this.dataChannel.bufferedAmountLowThreshold) {
-        await new Promise(r => setTimeout(r, 10)); // tiny throttle
-      }
-
-      let chunk = await readSlice(offset);
+      // 1. Read a large block from disk
+      const slice = file.slice(offset, offset + DISK_CHUNK_SIZE);
+      const arrayBuffer = await slice.arrayBuffer(); // Much faster than FileReader event loop
       
-      // Veil Privacy Layer: Encrypt chunk with AES-GCM before sending
-      if (this.cryptoKey) {
-        if (offset === 0) {
-          console.log('%c--- 🔐 VEIL PRIVACY LAYER: ENCRYPTION PROOF ---', 'color: #34d399; font-weight: bold');
-          const originalHex = Array.from(new Uint8Array(chunk).slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-          console.log(`%c[Sender] Raw bytes (first 16) : ${originalHex}`, 'color: #888b94');
-          
-          chunk = await cryptoService.encryptChunk(chunk, this.cryptoKey);
-          
-          const encryptedHex = Array.from(new Uint8Array(chunk).slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-          console.log(`%c[Sender] AES-GCM Ciphertext   : ${encryptedHex}`, 'color: #ef4444');
-          console.log('%c------------------------------------------------', 'color: #34d399');
-        } else {
-          chunk = await cryptoService.encryptChunk(chunk, this.cryptoKey);
+      let blockOffset = 0;
+
+      while (blockOffset < arrayBuffer.byteLength) {
+        // Respect backpressure: if buffer is full, wait for it to drain
+        if (this.dataChannel.bufferedAmount > 8 * 1024 * 1024) { // 8MB max buffer
+          await new Promise(resolve => {
+            this.dataChannel.addEventListener('bufferedamountlow', resolve, { once: true });
+          });
         }
+
+        const chunkLength = Math.min(NETWORK_CHUNK_SIZE, arrayBuffer.byteLength - blockOffset);
+        let chunk = arrayBuffer.slice(blockOffset, blockOffset + chunkLength);
+        
+        // Veil Privacy Layer: Encrypt chunk with AES-GCM before sending
+        if (this.cryptoKey) {
+          if (offset === 0 && blockOffset === 0) {
+            console.log('%c--- 🔐 VEIL PRIVACY LAYER: ENCRYPTION PROOF ---', 'color: #34d399; font-weight: bold');
+            const originalHex = Array.from(new Uint8Array(chunk).slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+            console.log(`%c[Sender] Raw bytes (first 16) : ${originalHex}`, 'color: #888b94');
+            
+            chunk = await cryptoService.encryptChunk(chunk, this.cryptoKey);
+            
+            const encryptedHex = Array.from(new Uint8Array(chunk).slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+            console.log(`%c[Sender] AES-GCM Ciphertext   : ${encryptedHex}`, 'color: #ef4444');
+            console.log('%c------------------------------------------------', 'color: #34d399');
+          } else {
+            chunk = await cryptoService.encryptChunk(chunk, this.cryptoKey);
+          }
+        }
+
+        this.dataChannel.send(chunk);
+        blockOffset += chunkLength;
+        offset += chunkLength;
       }
-
-      this.dataChannel.send(chunk);
-      // Advance offset by the ORIGINAL chunk size, not the encrypted payload size!
-      offset += Math.min(chunkSize, file.size - offset);  
-
-      const progress = Math.min(100, Math.round((offset / file.size) * 100));
       
-      const elapsedSeconds = (performance.now() - this.transferStartTime) / 1000;
-      let speedMBps = 0;
-      if (elapsedSeconds > 0.1) { // small buffer to avoid infinity/jitter
-        speedMBps = (offset / (1024 * 1024)) / elapsedSeconds;
-      }
+      const now = performance.now();
+      if (now - lastProgressUpdate > 100 || offset >= file.size) { // throttle UI updates to 10 FPS
+        const progress = Math.min(100, Math.round((offset / file.size) * 100));
+        const elapsedSeconds = (now - this.transferStartTime) / 1000;
+        let speedMBps = 0;
+        if (elapsedSeconds > 0.1) {
+          speedMBps = (offset / (1024 * 1024)) / elapsedSeconds;
+        }
 
-      window.dispatchEvent(new CustomEvent('webrtc:progress', { 
-        detail: { 
-          progress, 
-          speed: speedMBps > 0 ? speedMBps.toFixed(1) + ' MB/s' : 'Calculating...' 
-        } 
-      }));
+        window.dispatchEvent(new CustomEvent('webrtc:progress', { 
+          detail: { 
+            progress, 
+            speed: speedMBps > 0 ? speedMBps.toFixed(1) + ' MB/s' : 'Calculating...' 
+          } 
+        }));
+        lastProgressUpdate = now;
+      }
     }
 
     // Tell receiver we are done sending bytes

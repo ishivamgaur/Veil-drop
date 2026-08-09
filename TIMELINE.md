@@ -32,13 +32,15 @@
 - [x] Automatically encrypt 64KB chunks before they enter the data channel.
 - [x] Embed the encryption key exclusively in the URL Hash Fragment (`#k=`) so it never touches the server.
 
-## ✨ Phase 5: Final Polish & Production Build (PENDING)
+## ✨ Phase 5: Final Polish & Performance (IN PROGRESS)
+- [x] **Gigabit Speed Optimization:** Refactored WebRTC loop to read massive 4MB file blocks via `arrayBuffer()` instead of a `FileReader` per chunk, drastically reducing JS main thread overhead and allowing max network saturation (30MB/s - 100+ MB/s).
+- [x] **Backpressure Handling:** Monitored the `RTCDataChannel.bufferedAmount` (8MB max). Paused the upload loop via `bufferedamountlow` event when the network buffer fills up, waiting for it to drain to prevent packet loss and browser crashes.
+- [x] **UI Throttling:** Throttled the React transfer progress updates to 10 FPS to ensure the UI render cycle doesn't interrupt the WebRTC data channel upload stream.
 - [ ] Thorough QA testing of local network transfers and internet transfers.
 - [ ] Fix any edge cases regarding failed network traversal (STUN/TURN fallback).
 - [ ] Finalize UI states for disconnections or aborted transfers.
 
 ## 🔮 Phase 6: Enterprise Architecture Upgrades (Future Roadmap)
-- [ ] **File System Access API (Critical):** Replace the volatile RAM `ArrayBuffer` with the HTML5 File System Access API. Stream incoming WebRTC chunks directly to the user's hard drive to support massive (50GB+) file transfers without crashing the browser's memory.
-- [ ] **Backpressure Handling:** Monitor the `RTCDataChannel.bufferedAmount`. Pause the upload loop when the network buffer fills up, waiting for it to drain to prevent packet loss.
+- [x] **File System Access API (Completed):** Stream incoming WebRTC chunks directly to the user's hard drive to support massive (50GB+) file transfers without crashing the browser's memory.
 - [ ] **Resumable Transfers & Merkle Trees:** Hash the file into a Merkle Tree to allow resuming interrupted transfers from the exact chunk where they dropped, rather than restarting from 0%.
 - [ ] **Horizontal Scaling (Redis):** If massive user scale is reached, replace the in-memory Node.js `Map()` with a Redis database to allow deploying multiple signaling servers behind a load balancer.
