@@ -14,6 +14,77 @@ import { webrtcService } from './services/webRTCService';
 import { cryptoService } from './services/cryptoService';
 
 /**
+ * Floating bottom-anchored transfer progress / error bar.
+ * Shown while a transfer is active, during an error, or after abort.
+ */
+function ActiveTransferBar({ transfer: t, onCancel }) {
+  const isError = t.status === 'error';
+  return (
+    <AnimatePresence>
+      <motion.div
+        key={t.id}
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 25 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-md p-4 rounded-2xl backdrop-blur-lg shadow-[0_20px_60px_rgba(0,0,0,0.8)] border transition-colors duration-300 ${
+          isError ? 'bg-[#120d0d]/95 border-[#ef4444]/30' : 'bg-[#12141a]/95 border-[#262933]'
+        }`}
+      >
+        <div className="space-y-2">
+          {/* Top row: filename + % + cancel/dismiss ✕ */}
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium text-[#f2f3f7] truncate max-w-[65%]">
+              {isError ? '❌ Failed: ' : 'Streaming: '}{t.fileName}
+            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              {!isError && (
+                <span className="font-mono text-[11px] text-[#ded1b6]">{t.progress}%</span>
+              )}
+              <button
+                onClick={onCancel}
+                title={isError ? 'Dismiss' : 'Cancel transfer'}
+                className="w-5 h-5 flex items-center justify-center rounded-full bg-white/[0.07] hover:bg-white/[0.15] text-[#888b94] hover:text-[#f2f3f7] transition-colors cursor-pointer"
+              >
+                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Progress bar (hidden on error) */}
+          {!isError && (
+            <div className="w-full h-1 bg-[#1c1e26] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#ded1b6] transition-all duration-200"
+                style={{ width: `${t.progress}%` }}
+              />
+            </div>
+          )}
+
+          {/* Error message (shown on error) */}
+          {isError && (
+            <p className="text-[11px] font-mono text-[#ef4444] truncate">
+              {t.errorMessage || 'Connection lost — transfer aborted.'}
+            </p>
+          )}
+
+          {/* Bottom row: peer + speed (hidden on error) */}
+          {!isError && (
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#71747e]">
+              <span>To: {t.targetPeer}</span>
+              <span>{t.speed}</span>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+
+/**
  * Root Application Container
  * Ensures 100% universal consistency in container width (max-w-6xl), background (#070708), and typography.
  */
@@ -26,7 +97,7 @@ export default function App() {
   }, []);
 
   const { peers, selectedPeer, toggleSelectPeer } = usePeers('Sender-Host', addToast);
-  const { activeTransfers, historyVault, initiateBeam, clearHistory } = useTransfers(addToast, selectedPeer);
+  const { activeTransfers, historyVault, initiateBeam, cancelTransfer, clearHistory } = useTransfers(addToast, selectedPeer);
 
   // Automatically scroll to the top of the page whenever the view or tab changes
   useEffect(() => {
@@ -160,38 +231,8 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
 
-        {/* Floating Active Stream Progress Bar (Zero Boxy Bento Cards!) */}
-        <AnimatePresence>
-          {activeTransfers.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 25 }}
-              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-md p-4 rounded-2xl bg-[#12141a]/95 backdrop-blur-lg border border-[#262933] shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-[#f2f3f7] truncate max-w-[70%]">
-                    Streaming: {activeTransfers[0].fileName}
-                  </span>
-                  <span className="font-mono text-[11px] text-[#ded1b6]">
-                    {activeTransfers[0].progress}%
-                  </span>
-                </div>
-                <div className="w-full h-1 bg-[#1c1e26] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#ded1b6] transition-all duration-200"
-                    style={{ width: `${activeTransfers[0].progress}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-mono text-[#71747e]">
-                  <span>To: {activeTransfers[0].targetPeer}</span>
-                  <span>{activeTransfers[0].speed}</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Floating Active Stream Progress Bar */}
+        {activeTransfers.length > 0 && <ActiveTransferBar transfer={activeTransfers[0]} onCancel={cancelTransfer} />}
 
         {/* Minimalist Inline Completed History Row (Zero Boxy Bento Cards!) */}
         {historyVault.length > 0 && (

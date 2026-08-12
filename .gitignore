@@ -13,4 +13,4 @@ build/
 
 # Temp / Local Files
 *.log
-.env
+config.bat

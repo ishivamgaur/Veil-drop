@@ -33,12 +33,18 @@
 - [x] Embed the encryption key exclusively in the URL Hash Fragment (`#k=`) so it never touches the server.
 
 ## ✨ Phase 5: Final Polish & Performance (IN PROGRESS)
-- [x] **Gigabit Speed Optimization:** Refactored WebRTC loop to read massive 4MB file blocks via `arrayBuffer()` instead of a `FileReader` per chunk, drastically reducing JS main thread overhead and allowing max network saturation (30MB/s - 100+ MB/s).
-- [x] **Backpressure Handling:** Monitored the `RTCDataChannel.bufferedAmount` (8MB max). Paused the upload loop via `bufferedamountlow` event when the network buffer fills up, waiting for it to drain to prevent packet loss and browser crashes.
-- [x] **UI Throttling:** Throttled the React transfer progress updates to 10 FPS to ensure the UI render cycle doesn't interrupt the WebRTC data channel upload stream.
+- [x] **256KB Network Chunks:** Upgraded from 16KB → 256KB SCTP chunks. 16× fewer `send()` calls = massively reduced overhead, especially on non-local (internet) connections.
+- [x] **Macro-Block Encryption:** AES-GCM encryption now operates on entire 8MB disk blocks instead of per 16KB chunk. Reduces async crypto overhead by 16×, making E2EE transfers practical at internet speeds.
+- [x] **Non-Blocking Backpressure:** `bufferedamountlow` listener pre-wired once outside the send loop. No per-chunk event listener add/remove overhead.
+- [x] **Unordered DataChannel for Plaintext:** When E2EE is off, channel uses `ordered: false, maxRetransmits: 0` for true UDP semantics (no head-of-line blocking on packet loss).
+- [x] **8MB Disk Read Blocks:** Upgraded from 4MB → 8MB disk I/O reads, better amortizing file read latency.
+- [x] **20 FPS Progress Updates:** Throttled from 10 FPS → 20 FPS (50ms threshold) for smoother UI feedback.
+- [x] **Multi-File Queue Fix:** `onChannelReady` now iterates all selected files sequentially, not just `[0]`.
+- [x] **Debug Button Removed:** Removed "Simulate Join" test button from production `PrivateSenderStage`.
 - [ ] Thorough QA testing of local network transfers and internet transfers.
 - [ ] Fix any edge cases regarding failed network traversal (STUN/TURN fallback).
-- [ ] Finalize UI states for disconnections or aborted transfers.
+- [ ] Error state UI when `webrtc:transfer_error` fires (stuck progress bar fix).
+- [ ] Transfer cancel/abort button in the active transfer progress bar.
 
 ## 🔮 Phase 6: Enterprise Architecture Upgrades (Future Roadmap)
 - [x] **File System Access API (Completed):** Stream incoming WebRTC chunks directly to the user's hard drive to support massive (50GB+) file transfers without crashing the browser's memory.

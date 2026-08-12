@@ -46,6 +46,7 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
           setTransferComplete(false);
           if (addToast) addToast(`Recipient ${peer.deviceName} joined the private tunnel!`);
           
+          // Initiate with the first file; remaining files sent after channel opens
           if (filesRef.current.length > 0) {
             await webrtcService.initiateConnection(peer.id, filesRef.current[0], key);
           }
@@ -67,11 +68,14 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
       socketService.on('signal:ice_candidate', handleIceCandidate);
 
       // 4. Listen for Data Channel Ready to start blasting bytes!
-      const onChannelReady = () => {
-        if (filesRef.current.length > 0) {
-          // UI updates via hook or dispatch in initiateBeam
-          initiateBeam(filesRef.current[0], 'Remote Peer (WebRTC)');
-          webrtcService.sendFile(filesRef.current[0]);
+      const onChannelReady = async () => {
+        const files = filesRef.current;
+        if (files.length > 0) {
+          // Send all selected files sequentially
+          for (const file of files) {
+            initiateBeam(file, 'Remote Peer (WebRTC)');
+            await webrtcService.sendFile(file);
+          }
         }
       };
 
@@ -118,11 +122,7 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
-  const simulateRecipientConnect = () => {
-    setPeerConnected(true);
-    if (addToast) addToast('Recipient connected! Beginning direct WebRTC stream.');
-    selectedFiles.forEach(file => initiateBeam(file, 'Remote Peer (WebRTC)'));
-  };
+
 
   return (
     <div className="w-full flex flex-col items-center text-center">
@@ -195,11 +195,7 @@ export default function PrivateSenderStage({ initiateBeam, addToast }) {
               <span className={`w-1.5 h-1.5 rounded-full ${transferComplete ? 'bg-[#888b94]' : peerConnected ? 'bg-[#34d399] animate-pulse' : 'bg-[#ded1b6] animate-ping'}`} />
               {transferComplete ? 'Transmission complete. Tunnel closed.' : peerConnected ? 'Streaming payload...' : 'Waiting for recipient...'}
             </span>
-            {!peerConnected && (
-              <button onClick={simulateRecipientConnect} className="hover:text-[#ded1b6] underline transition-colors cursor-pointer">
-                Simulate Join
-              </button>
-            )}
+
           </div>
         </motion.div>
       )}
