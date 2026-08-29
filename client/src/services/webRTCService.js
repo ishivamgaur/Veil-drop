@@ -28,7 +28,7 @@ class WebRTCService {
     this.transferStartTime = null;
     this.fileWritableStream = null;
 
-    // 256KB network chunks — sweet spot for DataChannel throughput
+    // 256KB network chunks — sweet spot for DataChannel throughput (maximum speed)
     this.NETWORK_CHUNK_SIZE = 256 * 1024;
     // 8MB macro-blocks read from disk per I/O operation
     this.DISK_READ_SIZE = 8 * 1024 * 1024;
@@ -68,11 +68,8 @@ class WebRTCService {
     this.cryptoKey    = cryptoKey;
     this.createPeerConnection();
 
-    // Unordered + unreliable is faster for large binary streams when no E2EE.
-    // With E2EE we must keep ordered so the IV-prepended chunks arrive in sequence.
-    const channelOptions = cryptoKey
-      ? { ordered: true }
-      : { ordered: false, maxRetransmits: 0 };
+    // Always use ordered and reliable transport for file transfers to prevent corruption/drops over WAN
+    const channelOptions = { ordered: true };
 
     this.dataChannel = this.peerConnection.createDataChannel('veilBeam', channelOptions);
     this.setupDataChannel(this.dataChannel);
