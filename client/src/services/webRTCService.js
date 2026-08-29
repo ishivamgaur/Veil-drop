@@ -28,8 +28,9 @@ class WebRTCService {
     this.transferStartTime = null;
     this.fileWritableStream = null;
 
-    // 256KB network chunks — sweet spot for DataChannel throughput (maximum speed)
-    this.NETWORK_CHUNK_SIZE = 256 * 1024;
+    // 60KB network chunks — Required for 'ordered: true' reliable mode to prevent SCTP buffer overflow
+    // We use 60KB instead of 64KB so that adding the 28-byte encryption headers doesn't exceed the 65535 byte limit!
+    this.NETWORK_CHUNK_SIZE = 60 * 1024;
     // 8MB macro-blocks read from disk per I/O operation
     this.DISK_READ_SIZE = 8 * 1024 * 1024;
     // Backpressure: stop sending when buffered > 16MB, resume at < 8MB
@@ -68,7 +69,8 @@ class WebRTCService {
     this.cryptoKey    = cryptoKey;
     this.createPeerConnection();
 
-    // Always use ordered and reliable transport for file transfers to prevent corruption/drops over WAN
+    // Reliable transport is REQUIRED for WAN. 
+    // 64KB chunks + ordered: true = guaranteed delivery across all networks.
     const channelOptions = { ordered: true };
 
     this.dataChannel = this.peerConnection.createDataChannel('veilBeam', channelOptions);
@@ -290,42 +292,26 @@ class WebRTCService {
       const slice       = file.slice(offset, offset + this.DISK_READ_SIZE);
       let   blockBuffer = await slice.arrayBuffer();
 
-      // ── 2. Encrypt entire macro-block (one IV per 8MB, not per 256KB) ─────
-      //    This makes E2EE ~16× cheaper than per-chunk encryption.
-      let encryptedBlock     = null;
-      let encryptedBlockView = null;
-      if (this.cryptoKey) {
-        // encryptChunk returns ArrayBuffer with 12-byte IV prepended
-        encryptedBlock     = await cryptoService.encryptChunk(blockBuffer, this.cryptoKey);
-        encryptedBlockView = new Uint8Array(encryptedBlock);
-      }
-
-      // ── 3. Slice the (encrypted) block and push through DataChannel ───────
-      const sourceBuffer = encryptedBlock ?? blockBuffer;
-      const sourceBytes  = encryptedBlock
-        ? encryptedBlock.byteLength
-        : blockBuffer.byteLength;
-
       let blockOffset = 0;
-      while (blockOffset < sourceBytes) {
+      while (blockOffset < blockBuffer.byteLength) {
         // Back-pressure: yield until buffer drains if we're over the high watermark
         if (this.dataChannel.bufferedAmount > this.BUFFER_HIGH_WATERMARK) {
           await new Promise(resolve => { pauseSend = resolve; });
         }
 
-        const chunkLen = Math.min(this.NETWORK_CHUNK_SIZE, sourceBytes - blockOffset);
-        const chunk    = sourceBuffer instanceof ArrayBuffer
-          ? sourceBuffer.slice(blockOffset, blockOffset + chunkLen)
-          : encryptedBlockView.buffer.slice(
-              encryptedBlockView.byteOffset + blockOffset,
-              encryptedBlockView.byteOffset + blockOffset + chunkLen
-            );
+        const chunkLen = Math.min(this.NETWORK_CHUNK_SIZE, blockBuffer.byteLength - blockOffset);
+        let chunk = blockBuffer.slice(blockOffset, blockOffset + chunkLen);
+
+        // Encrypt individual network chunks. Hardware acceleration makes this extremely fast.
+        if (this.cryptoKey) {
+          chunk = await cryptoService.encryptChunk(chunk, this.cryptoKey);
+        }
 
         this.dataChannel.send(chunk);
         blockOffset += chunkLen;
       }
 
-      // Track unencrypted bytes for accurate progress on sender side
+      // Track bytes for accurate progress on sender side
       offset += blockBuffer.byteLength;
 
       // ── 4. Throttled progress events (max 20 FPS) ─────────────────────────

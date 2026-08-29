@@ -1,7 +1,6 @@
 # OS / IDE
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
 
 # Node / Packaging (if added later)
@@ -16,6 +15,4 @@ build/
 config.bat
 
 # Environment variables
-.env
-.env.*
 !.env.example
